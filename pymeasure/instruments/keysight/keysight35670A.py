@@ -953,7 +953,7 @@ def _format_limit_segment_data(value) -> str:
 class Keysight35670AInputChannel(Channel):
     """Represent an input channel of the Keysight 35670A."""
 
-    state = Channel.control(
+    _state = Channel.control(
         "INPut{ch}:STATe?",
         "INPut{ch}:STATe %d",
         """Control whether the input channel is enabled.""",
@@ -962,6 +962,18 @@ class Keysight35670AInputChannel(Channel):
         cast=int,
         validator=strict_discrete_set,
     )
+
+    @property
+    def state(self):
+        """Control whether the input channel is enabled."""
+        return type(self)._state.fget(self)
+
+    @state.setter
+    def state(self, value):
+        enabled = bool(strict_discrete_set(value, BOOL_VALUES))
+        if self.id == 1 and not enabled:
+            raise ValueError("Input channel 1 cannot be disabled.")
+        type(self)._state.fset(self, enabled)
 
     enabled = state
 
@@ -1713,7 +1725,8 @@ class Keysight35670ATrace(Channel):
     limit_failed = Channel.measurement(
         "CALCulate{ch}:LIMit:FAIL?",
         """Measure whether the last limit test failed.""",
-        cast=bool,
+        cast=int,
+        get_process=bool,
     )
 
     lower_limit_segment = Channel.control(
@@ -3773,12 +3786,6 @@ class Keysight35670A(SCPIMixin, Instrument):
         cast=int,
     )
 
-    calibration_result = Instrument.measurement(
-        "*CAL?",
-        """Measure the full calibration result.""",
-        cast=int,
-    )
-
     long_test_result = Instrument.measurement(
         "TEST:LONG:RESult?",
         """Measure the overall result of the long confidence test.""",
@@ -4680,8 +4687,14 @@ class Keysight35670A(SCPIMixin, Instrument):
         block = payload if raw else _encode_definite_block(payload)
         self.write_bytes(b"SYSTem:SET " + block)
 
-    def run_calibration(self) -> int:
-        """Run a full calibration and return the result code."""
+    def run_self_calibration(self, confirmed=False) -> int:
+        """Run full self-calibration and return the result code."""
+        _require_confirmation("run self calibration", confirmed)
+        return int(self.ask("*CAL?"))
+
+    def run_calibration(self, confirmed=False) -> int:
+        """Run CALibration:ALL and return the result code."""
+        _require_confirmation("run full calibration", confirmed)
         return int(self.ask("CALibration:ALL?"))
 
     def accept_average_preview(self) -> None:

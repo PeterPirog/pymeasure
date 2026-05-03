@@ -26,15 +26,38 @@ import pytest
 
 from pymeasure.instruments.keysight import Keysight35670A
 from pymeasure.instruments.keysight.keysight35670A import (
+    _coerce_bytes,
+    _encode_definite_block,
+    _format_limit_segment_data,
+    _math_register_selector,
+    _normalize_hardcopy_destination,
+    _normalize_hardcopy_line_type,
+    _normalize_hardcopy_source,
+    _normalize_hardcopy_timestamp_format,
+    _normalize_mass_memory_disk,
+    _normalize_memory_catalog_item,
+    _normalize_program_name,
+    _normalize_program_state,
+    _normalize_program_variable_name,
     _parse_ascii_floats,
+    _parse_ascii_or_definite_block_floats,
     _parse_ascii_ints,
     _parse_csv_strings,
+    _parse_definite_block,
+    _parse_limit_segment_data,
     _quote_string,
     _require_confirmation,
     _strip_quotes,
+    _tcap_selector,
+    _trace_selector,
+    _data_register_selector,
+    _validate_int_pair,
+    _validate_int_triplet,
 )
 from pymeasure.test import expected_protocol
 
+
+# --- helper tests ---
 
 def test_parse_ascii_floats_empty():
     """Verify empty replies return empty list."""
@@ -45,6 +68,17 @@ def test_parse_ascii_floats_empty():
 def test_parse_ascii_floats_values():
     """Verify values are parsed as floats."""
     assert _parse_ascii_floats("1, 2.5, -3E-1") == [1.0, 2.5, -0.3]
+
+
+def test_parse_ascii_floats_skips_empty_tokens():
+    """Verify empty CSV tokens are ignored by float parser."""
+    assert _parse_ascii_floats("1,,2") == [1.0, 2.0]
+
+
+def test_parse_ascii_floats_bad_token_raises():
+    """Verify non-float tokens raise ValueError."""
+    with pytest.raises(ValueError):
+        _parse_ascii_floats("bad")
 
 
 def test_parse_ascii_ints_empty():
@@ -58,9 +92,20 @@ def test_parse_ascii_ints_values():
     assert _parse_ascii_ints("1, -2, +3") == [1, -2, 3]
 
 
+def test_parse_ascii_ints_bad_token_raises():
+    """Verify non-integer tokens raise ValueError."""
+    with pytest.raises(ValueError):
+        _parse_ascii_ints("bad")
+
+
 def test_parse_csv_strings():
     """Verify CSV strings are parsed and unquoted."""
     assert _parse_csv_strings('"A","B,C", D ') == ["A", "B,C", "D"]
+
+
+def test_parse_csv_strings_quoted_values():
+    """Verify CSV parser keeps quoted commas and strips quotes."""
+    assert _parse_csv_strings('"A","B,C","D"') == ["A", "B,C", "D"]
 
 
 def test_strip_quotes():
@@ -77,10 +122,309 @@ def test_quote_string():
     assert _quote_string('A"B') == '"A""B"'
 
 
+def test_quote_string_rejects_non_string():
+    """Verify quoting rejects non-string arguments."""
+    with pytest.raises(TypeError):
+        _quote_string(123)  # type: ignore[arg-type]
+
+
 def test_require_confirmation_requires_true():
     """Verify risky actions require explicit confirmation."""
     with pytest.raises(ValueError, match="requires explicit confirmation"):
         _require_confirmation("delete state", confirmed=False)
+
+
+def test_require_confirmation_accepts_true():
+    """Verify confirmed=True does not raise."""
+    _require_confirmation("delete state", confirmed=True)
+
+
+def test_trace_selector_with_int_indices():
+    """Verify trace selector helper for integer indices."""
+    assert _trace_selector(1) == "TRACe1"
+    assert _trace_selector(4) == "TRACe4"
+
+
+def test_trace_selector_rejects_out_of_range_index():
+    """Verify trace selector rejects invalid index."""
+    with pytest.raises(ValueError):
+        _trace_selector(0)
+
+
+def test_trace_selector_accepts_direct_selector():
+    """Verify trace selector accepts preformatted selector tokens."""
+    assert _trace_selector("D1") == "D1"
+
+
+def test_tcap_selector_with_int_indices():
+    """Verify time-capture selector helper for integer indices."""
+    assert _tcap_selector(1) == "TCAP1"
+    assert _tcap_selector(4) == "TCAP4"
+
+
+def test_tcap_selector_accepts_direct_selector():
+    """Verify time-capture selector accepts preformatted selector."""
+    assert _tcap_selector("TCAP4") == "TCAP4"
+
+
+def test_tcap_selector_rejects_out_of_range_index():
+    """Verify time-capture selector rejects invalid index."""
+    with pytest.raises(ValueError):
+        _tcap_selector(5)
+
+
+def test_data_register_selector_valid_values():
+    """Verify data-register selector accepts numeric and token forms."""
+    assert _data_register_selector(1) == "D1"
+    assert _data_register_selector("D8") == "D8"
+
+
+def test_data_register_selector_rejects_out_of_range_index():
+    """Verify data-register selector rejects invalid index."""
+    with pytest.raises(ValueError):
+        _data_register_selector(9)
+
+
+def test_math_register_selector_valid_values():
+    """Verify math-register selector accepts valid indexes."""
+    assert _math_register_selector(1) == 1
+    assert _math_register_selector(5) == 5
+
+
+def test_math_register_selector_rejects_out_of_range_index():
+    """Verify math-register selector rejects invalid index."""
+    with pytest.raises(ValueError):
+        _math_register_selector(6)
+
+
+def test_validate_int_pair_valid():
+    """Verify integer pair validator accepts valid tuples."""
+    assert _validate_int_pair((1, 2), [(0, 4), (0, 4)]) == (1, 2)
+
+
+def test_validate_int_pair_invalid_length_raises():
+    """Verify integer pair validator rejects wrong tuple length."""
+    with pytest.raises(ValueError):
+        _validate_int_pair((1,), [(0, 4), (0, 4)])
+
+
+def test_validate_int_pair_invalid_type_raises():
+    """Verify integer pair validator rejects unsupported types."""
+    with pytest.raises(ValueError):
+        _validate_int_pair(3.14, [(0, 4), (0, 4)])
+
+
+def test_validate_int_triplet_valid():
+    """Verify integer triplet validator accepts valid tuples."""
+    assert _validate_int_triplet((1, 2, 3), [(0, 4), (0, 4), (0, 4)]) == (1, 2, 3)
+
+
+def test_validate_int_triplet_invalid_length_raises():
+    """Verify integer triplet validator rejects wrong tuple length."""
+    with pytest.raises(ValueError):
+        _validate_int_triplet((1, 2), [(0, 4), (0, 4), (0, 4)])
+
+
+def test_validate_int_triplet_invalid_type_raises():
+    """Verify integer triplet validator rejects unsupported types."""
+    with pytest.raises(ValueError):
+        _validate_int_triplet(object(), [(0, 4), (0, 4), (0, 4)])
+
+
+def test_encode_definite_block():
+    """Verify definite-block encoding helper."""
+    assert _encode_definite_block(b"ABC") == b"#13ABC"
+
+
+def test_parse_definite_block():
+    """Verify definite-block parsing helper."""
+    assert _parse_definite_block(b"#14ABCD") == b"ABCD"
+
+
+def test_parse_definite_block_empty_raises():
+    """Verify empty definite block raises ValueError."""
+    with pytest.raises(ValueError):
+        _parse_definite_block(b"")
+
+
+def test_parse_definite_block_missing_hash_raises():
+    """Verify non-block payload raises ValueError."""
+    with pytest.raises(ValueError):
+        _parse_definite_block(b"ABC")
+
+
+def test_parse_definite_block_malformed_header_raises():
+    """Verify malformed header raises ValueError."""
+    with pytest.raises(ValueError):
+        _parse_definite_block(b"#x3ABC")
+
+
+def test_parse_definite_block_incomplete_header_raises():
+    """Verify incomplete byte-count header raises ValueError."""
+    with pytest.raises(ValueError):
+        _parse_definite_block(b"#23A")
+
+
+def test_parse_definite_block_bad_byte_count_raises():
+    """Verify non-numeric byte count raises ValueError."""
+    with pytest.raises(ValueError):
+        _parse_definite_block(b"#1AABC")
+
+
+def test_parse_definite_block_short_payload_raises():
+    """Verify short payload raises ValueError."""
+    with pytest.raises(ValueError):
+        _parse_definite_block(b"#14ABC")
+
+
+def test_parse_definite_block_indefinite_length_path():
+    """Verify #0 block path returns trailing payload bytes."""
+    assert _parse_definite_block(b"#0ABC") == b"ABC"
+
+
+def test_parse_ascii_or_definite_block_floats_ascii():
+    """Verify mixed parser accepts ASCII CSV float payload."""
+    assert _parse_ascii_or_definite_block_floats("1,2,3") == [1.0, 2.0, 3.0]
+
+
+def test_parse_ascii_or_definite_block_floats_definite_block_ascii():
+    """Verify mixed parser accepts ASCII definite block payload."""
+    assert _parse_ascii_or_definite_block_floats(b"#151,2,3") == [1.0, 2.0, 3.0]
+
+
+def test_parse_ascii_or_definite_block_floats_definite_block_not_float_raises():
+    """Verify non-float ASCII block payload raises ValueError."""
+    with pytest.raises(ValueError):
+        _parse_ascii_or_definite_block_floats(b"#13ABC")
+
+
+def test_parse_ascii_or_definite_block_floats_binary_block_raises():
+    """Verify non-ASCII block payload raises ValueError."""
+    with pytest.raises(ValueError):
+        _parse_ascii_or_definite_block_floats(b"#13\xff\x00\x01")
+
+
+def test_format_limit_segment_data_nested():
+    """Verify limit segment formatter accepts nested tuples."""
+    assert _format_limit_segment_data([(1, 2, 3, 4)]) == "1,2,3,4"
+
+
+def test_format_limit_segment_data_flat():
+    """Verify limit segment formatter accepts flat lists."""
+    assert _format_limit_segment_data([1, 2, 3, 4]) == "1,2,3,4"
+
+
+def test_format_limit_segment_data_invalid_segment_length_raises():
+    """Verify limit segment formatter rejects malformed tuples."""
+    with pytest.raises(ValueError):
+        _format_limit_segment_data([(1, 2, 3)])
+
+
+def test_format_limit_segment_data_flat_invalid_multiple_raises():
+    """Verify limit segment formatter rejects non-multiple-of-4 flat lists."""
+    with pytest.raises(ValueError):
+        _format_limit_segment_data([1, 2, 3])
+
+
+def test_format_limit_segment_data_non_sequence_raises():
+    """Verify limit segment formatter rejects unsupported types."""
+    with pytest.raises(ValueError):
+        _format_limit_segment_data(123)
+
+
+def test_parse_limit_segment_data_valid():
+    """Verify limit segment parser returns 4-value tuples."""
+    assert _parse_limit_segment_data("1,2,3,4") == [(1.0, 2.0, 3.0, 4.0)]
+
+
+def test_parse_limit_segment_data_invalid_length_raises():
+    """Verify limit segment parser rejects malformed payloads."""
+    with pytest.raises(ValueError):
+        _parse_limit_segment_data("1,2,3")
+
+
+def test_normalize_hardcopy_destination_valid_and_invalid():
+    """Verify hardcopy destination normalizer valid and invalid paths."""
+    assert _normalize_hardcopy_destination("MMEMORY") == "MMEM"
+    with pytest.raises(ValueError):
+        _normalize_hardcopy_destination("INVALID")
+
+
+def test_normalize_hardcopy_timestamp_format_variants():
+    """Verify hardcopy timestamp format normalizer variants."""
+    assert _normalize_hardcopy_timestamp_format("FORM1") == "FORM1"
+    assert _normalize_hardcopy_timestamp_format("FORMAT1") == "FORM1"
+    with pytest.raises(ValueError):
+        _normalize_hardcopy_timestamp_format("FORM9")
+
+
+def test_normalize_hardcopy_source_valid_and_invalid():
+    """Verify hardcopy source normalizer valid and invalid paths."""
+    assert _normalize_hardcopy_source("MARK") == "MARK"
+    with pytest.raises(ValueError):
+        _normalize_hardcopy_source("INVALID")
+
+
+def test_normalize_hardcopy_line_type_variants_and_invalid():
+    """Verify hardcopy line-type normalizer variants and invalid values."""
+    assert _normalize_hardcopy_line_type("SOL") == "SOL"
+    assert _normalize_hardcopy_line_type("DASH") == "DASH"
+    assert _normalize_hardcopy_line_type("DOTT") == "DOTT"
+    assert _normalize_hardcopy_line_type("STYL3") == "STYL3"
+    with pytest.raises(ValueError):
+        _normalize_hardcopy_line_type("STYL2")
+    with pytest.raises(ValueError):
+        _normalize_hardcopy_line_type("INVALID")
+
+
+def test_normalize_memory_catalog_item_valid_and_invalid():
+    """Verify memory-catalog item normalizer valid and invalid paths."""
+    assert _normalize_memory_catalog_item("program") == "PROGram"
+    with pytest.raises(ValueError):
+        _normalize_memory_catalog_item("invalid")
+
+
+def test_normalize_mass_memory_disk_variants_and_invalid():
+    """Verify mass-memory disk normalizer variants and invalid values."""
+    assert _normalize_mass_memory_disk("RAM") == "RAM:"
+    assert _normalize_mass_memory_disk("NVRAM") == "NVRAM:"
+    assert _normalize_mass_memory_disk("EXT") == "EXT:"
+    with pytest.raises(ValueError):
+        _normalize_mass_memory_disk("INVALID")
+
+
+def test_normalize_program_name_variants_and_invalid():
+    """Verify program name normalizer variants and invalid values."""
+    assert _normalize_program_name("1") == "PROGram1"
+    assert _normalize_program_name("PROG1") == "PROGram1"
+    with pytest.raises(ValueError):
+        _normalize_program_name("PROG9")
+
+
+def test_normalize_program_state_variants_and_invalid():
+    """Verify program state normalizer variants and invalid values."""
+    assert _normalize_program_state("STOP") == "STOP"
+    assert _normalize_program_state("PAUSE") == "PAUSe"
+    assert _normalize_program_state("RUN") == "RUN"
+    assert _normalize_program_state("CONTINUE") == "CONTinue"
+    with pytest.raises(ValueError):
+        _normalize_program_state("INVALID")
+
+
+def test_normalize_program_variable_name_variants():
+    """Verify program variable normalizer for numeric and string variants."""
+    assert _normalize_program_variable_name(5) == "5"
+    assert _normalize_program_variable_name(5, string_variable=True) == "S5$"
+    assert _normalize_program_variable_name("A$", string_variable=True) == "A$"
+
+
+def test_coerce_bytes_variants_and_invalid():
+    """Verify bytes coercion accepts supported inputs and rejects invalid types."""
+    assert _coerce_bytes(b"AB") == b"AB"
+    assert _coerce_bytes(bytearray(b"AB")) == b"AB"
+    assert _coerce_bytes("AB") == b"AB"
+    with pytest.raises(TypeError):
+        _coerce_bytes(123)
 
 
 def test_input_channel_bias_enabled_bool_mapping():
@@ -110,6 +454,31 @@ def test_input_channel_enabled_alias():
     ) as inst:
         inst.ch4.enabled = True
         assert inst.ch4.enabled is False
+
+
+def test_input_channel_1_cannot_be_disabled():
+    """Verify channel 1 enable state cannot be set to off."""
+    with expected_protocol(Keysight35670A, []) as inst:
+        with pytest.raises(ValueError, match="cannot be disabled"):
+            inst.ch1.enabled = False
+
+
+def test_input_channel_1_enable_command():
+    """Verify channel 1 can be explicitly enabled."""
+    with expected_protocol(
+        Keysight35670A,
+        [("INPut1:STATe 1", None)],
+    ) as inst:
+        inst.ch1.enabled = True
+
+
+def test_input_channel_2_disable_command():
+    """Verify channels other than 1 can be disabled."""
+    with expected_protocol(
+        Keysight35670A,
+        [("INPut2:STATe 0", None)],
+    ) as inst:
+        inst.ch2.enabled = False
 
 
 def test_input_channel_coupling():
@@ -495,6 +864,17 @@ def test_source_voltage_slew_setter():
         [("SOURce:VOLTage:SLEW 100", None)],
     ) as inst:
         inst.source_voltage_slew = 100.0
+
+
+def test_source_voltage_offset_setter_and_getter():
+    """Verify source voltage offset roundtrip."""
+    with expected_protocol(
+        Keysight35670A,
+        [("SOURce:VOLTage:LEVel:IMMediate:OFFSet 1.5", None),
+         ("SOURce:VOLTage:LEVel:IMMediate:OFFSet?", "-0.25")],
+    ) as inst:
+        inst.source_voltage_offset = 1.5
+        assert inst.source_voltage_offset == -0.25
 
 
 def test_source_output_enabled_bool_mapping():
@@ -1161,6 +1541,24 @@ def test_allocate_program_memory_default():
         inst.allocate_program_memory("DEFAULT")
 
 
+def test_allocate_program_memory_max():
+    """Verify Instrument BASIC memory allocation MAX command."""
+    with expected_protocol(
+        Keysight35670A,
+        [("PROGram:MALLocate MAX", None)],
+    ) as inst:
+        inst.allocate_program_memory("MAX")
+
+
+def test_allocate_program_memory_min():
+    """Verify Instrument BASIC memory allocation MIN command."""
+    with expected_protocol(
+        Keysight35670A,
+        [("PROGram:MALLocate MIN", None)],
+    ) as inst:
+        inst.allocate_program_memory("MIN")
+
+
 def test_define_program_command_definite_block():
     """Verify selected Instrument BASIC definition upload command."""
     with expected_protocol(
@@ -1170,6 +1568,15 @@ def test_define_program_command_definite_block():
         inst.define_program("A")
 
 
+def test_define_program_command_raw_block():
+    """Verify selected Instrument BASIC definition upload in raw mode."""
+    with expected_protocol(
+        Keysight35670A,
+        [(b"PROGram:DEFine #11A", None)],
+    ) as inst:
+        inst.define_program(b"#11A", raw=True)
+
+
 def test_read_program_definition_query_block():
     """Verify selected Instrument BASIC definition query."""
     with expected_protocol(
@@ -1177,6 +1584,15 @@ def test_read_program_definition_query_block():
         [("PROGram:DEFine?", b"#11A")],
     ) as inst:
         assert inst.read_program_definition() == "A"
+
+
+def test_read_program_definition_query_block_raw():
+    """Verify selected Instrument BASIC definition query in raw mode."""
+    with expected_protocol(
+        Keysight35670A,
+        [("PROGram:DEFine?", b"#11A")],
+    ) as inst:
+        assert inst.read_program_definition(raw=True) == b"#11A"
 
 
 def test_define_explicit_program_command_definite_block():
@@ -1254,6 +1670,15 @@ def test_set_program_number_variable_command():
         [('PROGram:NUMBer "Address", 11', None)],
     ) as inst:
         inst.set_program_number_variable("Address", 11)
+
+
+def test_set_program_number_variable_sequence_command():
+    """Verify program numeric variable set command with sequence payload."""
+    with expected_protocol(
+        Keysight35670A,
+        [('PROGram:NUMBer "3", 1,2,3.5', None)],
+    ) as inst:
+        inst.set_program_number_variable(3, (1, 2.0, 3.5))
 
 
 def test_read_program_number_variable_query():
@@ -1402,6 +1827,15 @@ def test_display_window_x_match_command():
         inst.display4.x_match(3)
 
 
+def test_display_window_x_match_command_window2():
+    """Verify display2 X-axis match command keeps channel substitution."""
+    with expected_protocol(
+        Keysight35670A,
+        [("DISPlay:WINDow2:TRACe:X:MATCh1", None)],
+    ) as inst:
+        inst.display2.x_match(1)
+
+
 def test_display_window_trace_x_left_setter_and_getter():
     """Verify display window X-left roundtrip."""
     with expected_protocol(
@@ -1442,6 +1876,15 @@ def test_display_window_y_match_command():
         [("DISPlay:WINDow4:TRACe:Y:MATCh3", None)],
     ) as inst:
         inst.display4.y_match(3)
+
+
+def test_display_window_y_match_command_window3():
+    """Verify display3 Y-axis match command keeps channel substitution."""
+    with expected_protocol(
+        Keysight35670A,
+        [("DISPlay:WINDow3:TRACe:Y:MATCh2", None)],
+    ) as inst:
+        inst.display3.y_match(2)
 
 
 def test_display_window_trace_y_bottom_setter_and_getter():
@@ -2114,6 +2557,24 @@ def test_mass_memory_initialize_command():
         inst.mass_memory_initialize("INT:", "DOS", 0, 1, confirmed=True)
 
 
+def test_mass_memory_initialize_disk_only_command():
+    """Verify mass-memory initialize command with disk-only argument."""
+    with expected_protocol(
+        Keysight35670A,
+        [('MMEMory:INITialize "RAM"', None)],
+    ) as inst:
+        inst.mass_memory_initialize("RAM", confirmed=True)
+
+
+def test_mass_memory_initialize_full_optional_arguments_command():
+    """Verify mass-memory initialize command with all optional arguments."""
+    with expected_protocol(
+        Keysight35670A,
+        [('MMEMory:INITialize "RAM" LIF 1 2', None)],
+    ) as inst:
+        inst.mass_memory_initialize("RAM", "LIF", 1, 2, confirmed=True)
+
+
 def test_mass_memory_load_continue_requires_confirmation():
     """Verify mass-memory load-continue command requires confirmation."""
     with expected_protocol(Keysight35670A, []) as inst:
@@ -2148,6 +2609,15 @@ def test_mass_memory_load_data_table_trace_command():
         inst.mass_memory_load_data_table_trace(2, "INT:DTAB2.DAT", confirmed=True)
 
 
+def test_mass_memory_load_data_table_trace_command_short_filename():
+    """Verify mass-memory load data-table trace command trace-index rendering."""
+    with expected_protocol(
+        Keysight35670A,
+        [('MMEMory:LOAD:DTABle:TRACe2 "A"', None)],
+    ) as inst:
+        inst.mass_memory_load_data_table_trace(2, "A", confirmed=True)
+
+
 def test_mass_memory_load_lower_limit_trace_command():
     """Verify mass-memory load lower-limit trace command."""
     with expected_protocol(
@@ -2157,6 +2627,15 @@ def test_mass_memory_load_lower_limit_trace_command():
         inst.mass_memory_load_lower_limit_trace(3, "INT:LOW3.LIM", confirmed=True)
 
 
+def test_mass_memory_load_lower_limit_trace_command_short_filename():
+    """Verify mass-memory load lower-limit trace command trace-index rendering."""
+    with expected_protocol(
+        Keysight35670A,
+        [('MMEMory:LOAD:LIMit:LOWer:TRACe2 "A"', None)],
+    ) as inst:
+        inst.mass_memory_load_lower_limit_trace(2, "A", confirmed=True)
+
+
 def test_mass_memory_load_upper_limit_trace_command():
     """Verify mass-memory load upper-limit trace command."""
     with expected_protocol(
@@ -2164,6 +2643,15 @@ def test_mass_memory_load_upper_limit_trace_command():
         [('MMEMory:LOAD:LIMit:UPPer:TRACe4 "INT:UP4.LIM"', None)],
     ) as inst:
         inst.mass_memory_load_upper_limit_trace(4, "INT:UP4.LIM", confirmed=True)
+
+
+def test_mass_memory_load_upper_limit_trace_command_short_filename():
+    """Verify mass-memory load upper-limit trace command trace-index rendering."""
+    with expected_protocol(
+        Keysight35670A,
+        [('MMEMory:LOAD:LIMit:UPPer:TRACe2 "A"', None)],
+    ) as inst:
+        inst.mass_memory_load_upper_limit_trace(2, "A", confirmed=True)
 
 
 def test_mass_memory_load_math_command():
@@ -2229,6 +2717,15 @@ def test_mass_memory_load_trace_with_no_scale_command():
         inst.mass_memory_load_trace(1, "INT:TRACE1.SDF", no_scale=True, confirmed=True)
 
 
+def test_mass_memory_load_trace_with_no_scale_false_command():
+    """Verify mass-memory load trace command with explicit no-scale false value."""
+    with expected_protocol(
+        Keysight35670A,
+        [('MMEMory:LOAD:TRACe D2, "INT:TRACE2.SDF", 0', None)],
+    ) as inst:
+        inst.mass_memory_load_trace(2, "INT:TRACE2.SDF", no_scale=False, confirmed=True)
+
+
 def test_mass_memory_load_waterfall_command():
     """Verify mass-memory load waterfall command."""
     with expected_protocol(
@@ -2290,6 +2787,15 @@ def test_mass_memory_store_data_table_trace_command():
         inst.mass_memory_store_data_table_trace(1, "INT:DTAB1.DAT", confirmed=True)
 
 
+def test_mass_memory_store_data_table_trace_command_short_filename():
+    """Verify mass-memory store data-table trace command trace-index rendering."""
+    with expected_protocol(
+        Keysight35670A,
+        [('MMEMory:STORe:DTABle:TRACe3 "A"', None)],
+    ) as inst:
+        inst.mass_memory_store_data_table_trace(3, "A", confirmed=True)
+
+
 def test_mass_memory_store_lower_limit_trace_command():
     """Verify mass-memory store lower-limit trace command."""
     with expected_protocol(
@@ -2299,6 +2805,15 @@ def test_mass_memory_store_lower_limit_trace_command():
         inst.mass_memory_store_lower_limit_trace(2, "INT:LOW2.LIM", confirmed=True)
 
 
+def test_mass_memory_store_lower_limit_trace_command_short_filename():
+    """Verify mass-memory store lower-limit trace command trace-index rendering."""
+    with expected_protocol(
+        Keysight35670A,
+        [('MMEMory:STORe:LIMit:LOWer:TRACe2 "A"', None)],
+    ) as inst:
+        inst.mass_memory_store_lower_limit_trace(2, "A", confirmed=True)
+
+
 def test_mass_memory_store_upper_limit_trace_command():
     """Verify mass-memory store upper-limit trace command."""
     with expected_protocol(
@@ -2306,6 +2821,15 @@ def test_mass_memory_store_upper_limit_trace_command():
         [('MMEMory:STORe:LIMit:UPPer:TRACe4 "INT:UP4.LIM"', None)],
     ) as inst:
         inst.mass_memory_store_upper_limit_trace(4, "INT:UP4.LIM", confirmed=True)
+
+
+def test_mass_memory_store_upper_limit_trace_command_short_filename():
+    """Verify mass-memory store upper-limit trace command trace-index rendering."""
+    with expected_protocol(
+        Keysight35670A,
+        [('MMEMory:STORe:LIMit:UPPer:TRACe2 "A"', None)],
+    ) as inst:
+        inst.mass_memory_store_upper_limit_trace(2, "A", confirmed=True)
 
 
 def test_mass_memory_store_math_command():
@@ -2369,6 +2893,43 @@ def test_mass_memory_store_waterfall_command():
         [('MMEMory:STORe:WATerfall TRACe2, "INT:WAT2.SDF"', None)],
     ) as inst:
         inst.mass_memory_store_waterfall(2, "INT:WAT2.SDF", confirmed=True)
+
+
+@pytest.mark.parametrize(
+    ("method_name", "args", "kwargs"),
+    [
+        ("mass_memory_load_cfit", ("INT:CURVE1.FIT",), {}),
+        ("mass_memory_load_data_table_trace", (2, "INT:DTAB2.DAT"), {}),
+        ("mass_memory_load_lower_limit_trace", (2, "INT:LOW2.LIM"), {}),
+        ("mass_memory_load_upper_limit_trace", (2, "INT:UP2.LIM"), {}),
+        ("mass_memory_load_math", ("INT:MATH.DEF",), {}),
+        ("mass_memory_load_program", ("INT:MYPROG.BAS",), {}),
+        ("mass_memory_load_state", ("INT:STATE.STA",), {"slot": 1}),
+        ("mass_memory_load_synthesis", ("INT:SYNTH.SYN",), {}),
+        ("mass_memory_load_time_capture", ("INT:TCAP1.SDF",), {}),
+        ("mass_memory_load_trace", (2, "INT:TRACE2.SDF"), {}),
+        ("mass_memory_load_waterfall", (2, "INT:WAT2.SDF"), {}),
+        ("mass_memory_make_directory", ("INT:\\RESULTS",), {}),
+        ("mass_memory_move", ("INT:OLD.DAT", "INT:NEW.DAT"), {}),
+        ("mass_memory_store_cfit", ("INT:CURVE1.FIT",), {}),
+        ("mass_memory_store_data_table_trace", (3, "INT:DTAB3.DAT"), {}),
+        ("mass_memory_store_lower_limit_trace", (2, "INT:LOW2.LIM"), {}),
+        ("mass_memory_store_upper_limit_trace", (2, "INT:UP2.LIM"), {}),
+        ("mass_memory_store_math", ("INT:MATH.DEF",), {}),
+        ("mass_memory_store_program", ("INT:MYPROG.BAS",), {}),
+        ("mass_memory_store_state", ("INT:STATE.STA",), {"slot": 1}),
+        ("mass_memory_store_synthesis", ("INT:SYNTH.SYN",), {}),
+        ("mass_memory_store_time_capture", ("INT:TCAP1.SDF",), {}),
+        ("mass_memory_store_trace", (2, "INT:TRACE2.SDF"), {}),
+        ("mass_memory_store_waterfall", (2, "INT:WAT2.SDF"), {}),
+    ],
+)
+def test_mass_memory_methods_require_confirmation(method_name, args, kwargs):
+    """Verify destructive mass-memory methods require explicit confirmation."""
+    with expected_protocol(Keysight35670A, []) as inst:
+        method = getattr(inst, method_name)
+        with pytest.raises(ValueError, match="requires explicit confirmation"):
+            method(*args, **kwargs)
 
 
 def test_trace_amplitude_unit_mapping():
@@ -2523,8 +3084,17 @@ def test_trace_limit_beeper_enabled_bool_mapping():
         assert inst.trace2.limit_beeper_enabled is False
 
 
-def test_trace_limit_failed_measurement():
-    """Verify trace limit failed query."""
+def test_trace_limit_failed_measurement_false():
+    """Verify trace limit failed query maps 0 to False."""
+    with expected_protocol(
+        Keysight35670A,
+        [("CALCulate1:LIMit:FAIL?", "0")],
+    ) as inst:
+        assert inst.trace1.limit_failed is False
+
+
+def test_trace_limit_failed_measurement_true():
+    """Verify trace limit failed query maps 1 to True."""
     with expected_protocol(
         Keysight35670A,
         [("CALCulate3:LIMit:FAIL?", "1")],
@@ -2652,6 +3222,15 @@ def test_trace_move_upper_limit_y_command():
         [("CALCulate1:LIMit:UPPer:MOVE:Y 4", None)],
     ) as inst:
         inst.trace1.move_upper_limit_y(4)
+
+
+def test_trace_move_upper_limit_y_command_trace2():
+    """Verify upper-limit move command keeps channel substitution."""
+    with expected_protocol(
+        Keysight35670A,
+        [("CALCulate2:LIMit:UPPer:MOVE:Y 1.5", None)],
+    ) as inst:
+        inst.trace2.move_upper_limit_y(1.5)
 
 
 def test_trace_read_upper_limit_report_x_ascii():
@@ -3082,6 +3661,15 @@ def test_trace_set_math_constant_complex_command():
         inst.trace1.set_math_constant(1, -1, 1)
 
 
+def test_trace_set_math_constant_command_trace2():
+    """Verify math constant command keeps channel substitution for trace 2."""
+    with expected_protocol(
+        Keysight35670A,
+        [("CALCulate2:MATH:CONStant1 2", None)],
+    ) as inst:
+        inst.trace2.set_math_constant(1, 2.0)
+
+
 def test_trace_math_constant_query():
     """Verify math constant query parser."""
     with expected_protocol(
@@ -3098,6 +3686,15 @@ def test_trace_set_math_expression_command():
         [('CALCulate4:MATH:EXPRession2 "(K1*FRES)"', None)],
     ) as inst:
         inst.trace4.set_math_expression("(K1*FRES)", function_register=2)
+
+
+def test_trace_set_math_expression_command_trace2():
+    """Verify math expression command keeps channel substitution for trace 2."""
+    with expected_protocol(
+        Keysight35670A,
+        [('CALCulate2:MATH:EXPRession3 "A+B"', None)],
+    ) as inst:
+        inst.trace2.set_math_expression("A+B", 3)
 
 
 def test_trace_math_expression_query():
@@ -3525,6 +4122,15 @@ def test_trace_copy_waterfall_slice_to_register_command():
         inst.trace4.copy_waterfall_slice_to_register(8)
 
 
+def test_trace_copy_waterfall_slice_to_register_command_trace2():
+    """Verify waterfall slice copy command keeps channel substitution for trace 2."""
+    with expected_protocol(
+        Keysight35670A,
+        [("CALCulate2:WATerfall:SLICe:COPY D4", None)],
+    ) as inst:
+        inst.trace2.copy_waterfall_slice_to_register(4)
+
+
 def test_trace_waterfall_slice_select_setter_and_getter():
     """Verify waterfall slice select roundtrip."""
     with expected_protocol(
@@ -3554,6 +4160,15 @@ def test_trace_copy_waterfall_trace_to_register_command():
         [("CALCulate3:WATerfall:TRACe:COPY D7", None)],
     ) as inst:
         inst.trace3.copy_waterfall_trace_to_register(7)
+
+
+def test_trace_copy_waterfall_trace_to_register_command_trace2():
+    """Verify waterfall trace copy command keeps channel substitution for trace 2."""
+    with expected_protocol(
+        Keysight35670A,
+        [("CALCulate2:WATerfall:TRACe:COPY D5", None)],
+    ) as inst:
+        inst.trace2.copy_waterfall_trace_to_register(5)
 
 
 def test_trace_waterfall_trace_select_setter_and_getter():
@@ -3936,6 +4551,15 @@ def test_write_trace_raw_data_ascii_values():
         inst.write_trace_raw_data([1, 2.5, -3], register="D3")
 
 
+def test_write_trace_raw_data_float_value():
+    """Verify writing scalar float values to a trace data register."""
+    with expected_protocol(
+        Keysight35670A,
+        [("TRACe:DATA D1, 1.5", None)],
+    ) as inst:
+        inst.write_trace_raw_data(1.5, register=1)
+
+
 def test_write_trace_raw_data_encodes_definite_block():
     """Verify writing bytes auto-encodes to definite block for TRACe:DATA."""
     with expected_protocol(
@@ -3952,6 +4576,13 @@ def test_write_trace_raw_data_raw_block_passthrough():
         [(b"TRACe:DATA D4,#14ABCD", None)],
     ) as inst:
         inst.write_trace_raw_data(b"#14ABCD", register=4, raw=True)
+
+
+def test_write_trace_raw_data_invalid_type_raises():
+    """Verify writing unsupported TRACe:DATA payload type raises TypeError."""
+    with expected_protocol(Keysight35670A, []) as inst:
+        with pytest.raises(TypeError):
+            inst.write_trace_raw_data(object(), register=1)
 
 
 def test_read_trace_x_data_ascii():
@@ -4044,6 +4675,15 @@ def test_write_trace_waterfall_data_ascii_values():
         inst.write_trace_waterfall_data([1, 2.5, -3], register="W3")
 
 
+def test_write_trace_waterfall_data_float_value():
+    """Verify writing scalar float values to a waterfall register."""
+    with expected_protocol(
+        Keysight35670A,
+        [("TRACe:WATerfall:DATA W1, 1.5", None)],
+    ) as inst:
+        inst.write_trace_waterfall_data(1.5, register=1)
+
+
 def test_write_trace_waterfall_data_encodes_definite_block():
     """Verify writing bytes auto-encodes to definite block for TRACe:WATerfall:DATA."""
     with expected_protocol(
@@ -4060,6 +4700,13 @@ def test_write_trace_waterfall_data_raw_block_passthrough():
         [(b"TRACe:WATerfall:DATA W4,#14ABCD", None)],
     ) as inst:
         inst.write_trace_waterfall_data(b"#14ABCD", register=4, raw=True)
+
+
+def test_write_trace_waterfall_data_invalid_type_raises():
+    """Verify writing unsupported waterfall payload type raises TypeError."""
+    with expected_protocol(Keysight35670A, []) as inst:
+        with pytest.raises(TypeError):
+            inst.write_trace_waterfall_data(object(), register=1)
 
 
 def test_trace_data_transfer_wrapper():
@@ -4991,6 +5638,15 @@ def test_wait_for_completion():
         assert inst.wait_for_completion() == 1
 
 
+def test_wait_for_completion_zero_response():
+    """Verify wait for completion keeps an explicit zero response as integer 0."""
+    with expected_protocol(
+        Keysight35670A,
+        [("*OPC?", "0")],
+    ) as inst:
+        assert inst.wait_for_completion() == 0
+
+
 def test_wait_command():
     """Verify wait command."""
     with expected_protocol(
@@ -5009,6 +5665,17 @@ def test_operation_complete():
         assert inst.operation_complete() == 1
 
 
+def test_operation_complete_zero_response():
+    """Verify operation complete query does not treat '0' as truthy."""
+    with expected_protocol(
+        Keysight35670A,
+        [("*OPC?", "0")],
+    ) as inst:
+        result = inst.operation_complete()
+        assert result == 0
+        assert bool(result) is False
+
+
 def test_self_test_result_query():
     """Verify self-test query."""
     with expected_protocol(
@@ -5018,13 +5685,20 @@ def test_self_test_result_query():
         assert inst.self_test_result == 0
 
 
-def test_calibration_result_query():
-    """Verify full calibration query."""
+def test_run_self_calibration_requires_confirmation():
+    """Verify self calibration requires explicit confirmation."""
+    with expected_protocol(Keysight35670A, []) as inst:
+        with pytest.raises(ValueError, match="requires explicit confirmation"):
+            inst.run_self_calibration()
+
+
+def test_run_self_calibration():
+    """Verify self calibration command helper."""
     with expected_protocol(
         Keysight35670A,
         [("*CAL?", "0")],
     ) as inst:
-        assert inst.calibration_result == 0
+        assert inst.run_self_calibration(confirmed=True) == 0
 
 
 def test_event_status_enable_setter_and_getter():
@@ -5182,13 +5856,20 @@ def test_calibration_auto_setter_and_getter():
         assert inst.calibration_auto == "on"
 
 
+def test_run_calibration_requires_confirmation():
+    """Verify CALibration:ALL requires explicit confirmation."""
+    with expected_protocol(Keysight35670A, []) as inst:
+        with pytest.raises(ValueError, match="requires explicit confirmation"):
+            inst.run_calibration()
+
+
 def test_run_calibration():
     """Verify CALibration:ALL query helper."""
     with expected_protocol(
         Keysight35670A,
         [("CALibration:ALL?", "0")],
     ) as inst:
-        assert inst.run_calibration() == 0
+        assert inst.run_calibration(confirmed=True) == 0
 
 
 def test_drain_errors_no_error():
@@ -5196,6 +5877,15 @@ def test_drain_errors_no_error():
     with expected_protocol(
         Keysight35670A,
         [("SYSTem:ERRor?", "0,No error")],
+    ) as inst:
+        inst.drain_errors()
+
+
+def test_drain_errors_no_error_plus_zero_with_quotes():
+    """Verify '+0,\"No error\"' is treated as queue-empty sentinel."""
+    with expected_protocol(
+        Keysight35670A,
+        [("SYSTem:ERRor?", '+0,"No error"')],
     ) as inst:
         inst.drain_errors()
 
@@ -5209,6 +5899,47 @@ def test_drain_errors_raises_runtime_error():
     ) as inst:
         with pytest.raises(RuntimeError, match="error queue is not empty"):
             inst.drain_errors()
+
+
+def test_drain_errors_float_code_raises_runtime_error():
+    """Verify float-like error code token is parsed and treated as error."""
+    with expected_protocol(
+        Keysight35670A,
+        [("SYSTem:ERRor?", '-100.0,"Command error"'),
+         ("SYSTem:ERRor?", '+0,"No error"')],
+    ) as inst:
+        with pytest.raises(RuntimeError, match="error queue is not empty"):
+            inst.drain_errors()
+
+
+def test_drain_errors_unparseable_code_raises_runtime_error():
+    """Verify unparseable error token does not crash parser and still raises RuntimeError."""
+    with expected_protocol(
+        Keysight35670A,
+        [("SYSTem:ERRor?", '"BAD","Malformed response"'),
+         ("SYSTem:ERRor?", '+0,"No error"')],
+    ) as inst:
+        with pytest.raises(RuntimeError, match="error queue is not empty"):
+            inst.drain_errors()
+
+
+def test_drain_errors_respects_max_errors_limit():
+    """Verify drain errors stops after max_errors reads and raises with collected errors."""
+    with expected_protocol(
+        Keysight35670A,
+        [("SYSTem:ERRor?", '-100,"Command error"'),
+         ("SYSTem:ERRor?", '-200,"Execution error"'),
+         ("SYSTem:ERRor?", '-300,"Device-specific error"')],
+    ) as inst:
+        with pytest.raises(RuntimeError, match="error queue is not empty"):
+            inst.drain_errors(max_errors=3)
+
+
+def test_drain_errors_rejects_invalid_max_errors():
+    """Verify invalid max_errors rejects early without sending instrument commands."""
+    with expected_protocol(Keysight35670A, []) as inst:
+        with pytest.raises(ValueError, match="max_errors must be >= 1"):
+            inst.drain_errors(max_errors=0)
 
 
 def test_trigger():
