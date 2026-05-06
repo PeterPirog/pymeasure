@@ -1,0 +1,51 @@
+Pracujesz w lokalnym repozytorium PyMeasure.
+
+Cel: zaimplementuj pierwszą paczkę drivera PyMeasure dla <vendor> <model>: szkielet klasy + bezpieczne Common/Status/System query. Nie implementuj jeszcze subsystemów pomiarowych.
+
+Pliki wejściowe:
+- assets/<vendor>/<model>/architecture_plan.md
+- assets/<vendor>/<model>/command_coverage.md
+- assets/<vendor>/<model>/service_coverage.md
+- assets/<vendor>/<model>/programming_guide.md
+
+Zmodyfikuj:
+- pymeasure/instruments/<vendor>/<model>.py
+- pymeasure/instruments/<vendor>/__init__.py
+- tests/instruments/<vendor>/test_<model>.py
+- tests/instruments/<vendor>/test_<model>_with_device.py
+- docs/api/instruments/<vendor>/<model>.rst
+- docs/api/instruments/<vendor>/index.rst
+- assets/<vendor>/<model>/command_coverage.md
+
+Wymagania:
+1. Utwórz klasę `<ClassName>`.
+2. Jeśli przyrząd jest SCPI/IEEE-488.2, użyj:
+   `class <ClassName>(SCPIMixin, Instrument):`
+3. Nie używaj `includeSCPI=True`.
+4. Dodaj `__init__` z nazwą przyrządu i bezpiecznymi domyślnymi ustawieniami komunikacji, jeśli manual je podaje.
+5. Nie twórz metod `get_*` ani `set_*`.
+6. Nie duplikuj standardowych metod/właściwości z SCPIMixin, jeśli już istnieją.
+7. Dodaj tylko bezpieczne query/status właściwości potwierdzone w Programming Guide.
+8. Komendy reset/preset/clear mogą mieć metody, ale hardware test dla reset/preset ma być ostrożny albo pominięty.
+9. Każda zaimplementowana komenda musi mieć test `expected_protocol`.
+
+Testy:
+- test importu klasy
+- test id/check_id, jeśli właściwe
+- testy expected_protocol dla każdej dodanej właściwości/metody
+- hardware test tylko:
+  - identyfikacja `*IDN?`
+  - bezpieczne query-only
+  - error queue query, jeśli dostępna
+- hardware tests muszą być pomijane bez adresu
+
+Po implementacji zaktualizuj `command_coverage.md`:
+- Python API
+- Protocol test
+- Hardware test policy
+- Status
+
+Na końcu uruchom:
+python -m pytest tests/instruments/<vendor>/test_<model>.py -q
+git diff --check
+git diff --stat

@@ -1,0 +1,40 @@
+Pracujesz w lokalnym repozytorium PyMeasure.
+
+Cel: wykonaj final cleanup dla drivera <vendor> <model> przed pull requestem.
+
+Sprawdź i popraw:
+- pymeasure/instruments/<vendor>/<model>.py
+- pymeasure/instruments/<vendor>/__init__.py
+- tests/instruments/<vendor>/test_<model>.py
+- tests/instruments/<vendor>/test_<model>_with_device.py
+- docs/api/instruments/<vendor>/<model>.rst
+- docs/api/instruments/<vendor>/index.rst
+
+Checklist:
+1. Klasa importuje się z `pymeasure.instruments.<vendor>`.
+2. Jeśli urządzenie jest SCPI, klasa dziedziczy po `SCPIMixin, Instrument`.
+3. Brak `includeSCPI=True`.
+4. Brak `get_*` i `set_*`.
+5. Właściwości używają `Instrument.measurement`, `Instrument.control`, `Instrument.setting`.
+6. Metody są tylko dla akcji, transferów danych, parserów i operacji wieloetapowych.
+7. Każda właściwość ma docstring z jednostkami/typami/zakresami, jeśli znane.
+8. Każdy validator używa danych z manuala.
+9. Każde mapowanie `values={...}` używa tokenów z manuala.
+10. Testy expected_protocol są kompletne dla zaimplementowanych komend.
+11. Testy sprzętowe są pomijalne bez adresu.
+12. Testy sprzętowe nie wykonują komend destructive/service/power/calibration.
+13. Po testach sprzętowych źródła/wyjścia są wyłączone, jeśli dotyczy.
+14. Dokumentacja Sphinx jest dodana.
+15. Vendor index jest zaktualizowany.
+16. `assets/`, `AGENTS.md`, manuale PDF, logi lokalne i worklogi nie wchodzą do finalnego PR.
+
+Uruchom:
+python -m pytest tests/instruments/<vendor>/test_<model>.py -q
+git diff --check
+git diff --stat
+git status --short
+
+Na końcu wypisz:
+- pliki, które powinny wejść do PR,
+- pliki, które nie powinny wejść do PR,
+- komendy deferred/not-implemented i powód.

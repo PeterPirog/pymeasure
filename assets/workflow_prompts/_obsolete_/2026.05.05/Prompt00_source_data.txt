@@ -1,0 +1,45 @@
+
+SOURCE DATA FOR CODEX
+
+Work in the local PyMeasure repository.
+
+Instrument parameters:
+VENDOR = <vendor>
+MODEL = <model>
+CLASS_NAME = <ClassName>
+INSTRUMENT_TYPE = <instrument type>
+DEVICE_ADDRESS = <VISA address or empty string>
+
+Asset paths:
+ASSET_DIR = assets/<VENDOR>/<MODEL>
+PROGRAMMING_GUIDE = assets/<VENDOR>/<MODEL>/programming_guide.md
+SERVICE_MANUAL = assets/<VENDOR>/<MODEL>/service_manual.md
+OPERATORS_GUIDE = assets/<VENDOR>/<MODEL>/operators_guide.md
+COMMANDS_TXT = assets/<VENDOR>/<MODEL>/commands.txt
+COMMAND_COVERAGE = assets/<VENDOR>/<MODEL>/command_coverage.md
+SERVICE_COVERAGE = assets/<VENDOR>/<MODEL>/service_coverage.md
+OPERATOR_COVERAGE = assets/<VENDOR>/<MODEL>/operator_coverage.md
+ARCHITECTURE_PLAN = assets/<VENDOR>/<MODEL>/architecture_plan.md
+CODEX_WORKLOG = assets/<VENDOR>/<MODEL>/codex_worklog.md
+
+Planned PyMeasure files:
+DRIVER_FILE = pymeasure/instruments/<VENDOR>/<MODEL_lower>.py
+VENDOR_INIT = pymeasure/instruments/<VENDOR>/__init__.py
+PROTOCOL_TEST = tests/instruments/<VENDOR>/test_<MODEL_lower>.py
+HARDWARE_TEST = tests/instruments/<VENDOR>/test_<MODEL_lower>_with_device.py
+DOC_FILE = docs/api/instruments/<VENDOR>/<MODEL_lower>.rst
+DOC_INDEX = docs/api/instruments/<VENDOR>/index.rst
+
+Global rules:
+- Do not invent commands.
+- Command syntax must come only from programming_guide.md or another explicit remote programming command reference.
+- service_manual.md may only affect risk, safety, calibration, adjustment, hardware-test policy, and service-only classification.
+- operators_guide.md may only affect user-facing semantics, safe operating sequence, front-panel terminology, and final safe state.
+- Use PyMeasure patterns: SCPIMixin + Instrument for SCPI instruments; never use includeSCPI=True.
+- Do not create get_* or set_* methods.
+- Use Instrument.measurement, Instrument.control, Instrument.setting.
+- Use explicit methods for command-only actions, destructive operations, long operations, and data transfer parsers.
+- Every implemented command must have an expected_protocol test.
+- Hardware tests must be skipped when DEVICE_ADDRESS is empty.
+- Never run destructive, calibration, adjustment, format, delete, store, power-off, firmware, factory, or long self-test commands in automatic hardware tests.
+- After hardware tests, leave the instrument in a safe state and query the error queue if available.

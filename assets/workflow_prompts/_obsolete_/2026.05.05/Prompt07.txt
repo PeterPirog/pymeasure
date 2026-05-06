@@ -1,0 +1,51 @@
+Pracujesz w lokalnym repozytorium PyMeasure.
+
+Cel: przeanalizuj komendy ryzykowne z `command_coverage.md` i zaimplementuj tylko te, które mają sens jako jawne, świadome API. Resztę oznacz jako deferred/not-implemented. Nie dodawaj automatycznych testów sprzętowych dla komend ryzykownych.
+
+Pliki:
+- assets/<vendor>/<model>/command_coverage.md
+- assets/<vendor>/<model>/service_coverage.md
+- pymeasure/instruments/<vendor>/<model>.py
+- tests/instruments/<vendor>/test_<model>.py
+- tests/instruments/<vendor>/test_<model>_with_device.py
+- docs/api/instruments/<vendor>/<model>.rst
+
+Zakres:
+- calibration
+- self-test long
+- adjustment
+- clear/delete/format/initialize
+- factory/service
+- power/reboot
+- firmware
+- network/GPIB address
+- nonvolatile memory
+- hazardous output enable
+
+Reguły:
+1. Nie implementuj ryzykownej komendy jako zwykłej property.
+2. Jeżeli implementujesz, użyj jawnej metody o nazwie pokazującej ryzyko, np.:
+   - `run_long_self_test`
+   - `clear_error_log`
+   - `delete_file`
+   - `format_memory`
+   - `save_calibration`
+   ale tylko jeśli Programming Guide potwierdza składnię.
+3. Docstring musi zawierać:
+   - co robi komenda,
+   - co może skasować lub zmienić,
+   - czy jest długotrwała,
+   - że nie jest uruchamiana w automatycznych testach sprzętowych.
+4. Dodaj tylko expected_protocol tests.
+5. W hardware test file dodaj skip/comment/policy, ale nie wywołuj ryzykownych metod.
+6. Jeśli komenda jest zbyt ryzykowna dla publicznego API, nie implementuj jej i oznacz w coverage jako `not-implemented` albo `deferred`.
+
+Zaktualizuj dokumentację Sphinx:
+- sekcja "Risky and service-related commands"
+- lista zaimplementowanych ryzykownych metod
+- ostrzeżenie, że automatyczne testy sprzętowe ich nie uruchamiają
+
+Na końcu uruchom:
+python -m pytest tests/instruments/<vendor>/test_<model>.py -q
+git diff --check
+git diff --stat

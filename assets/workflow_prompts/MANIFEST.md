@@ -1,0 +1,29 @@
+# Package manifest
+
+- `00_PROMPT_SEQUENCE.md` — 3567 bytes — sha256:c7ab7b5f21cc4e2c
+- `MODEL_SELECTION_AND_HARDWARE_ACCESS.md` — 1211 bytes — sha256:d2dcd7802a1b48df
+- `QUALITY_GATE_MATRIX.md` — 1839 bytes — sha256:343022e2f9c61f11
+- `README.md` — 1987 bytes — sha256:cdd8a30a9da34ac3
+- `UPSTREAM_AGENTS_COMPLIANCE_SUMMARY.md` — 861 bytes — sha256:fcc2f0a2e3f89d1e
+- `prompts/01_prepare_assets_workspace_prompt.md` — 5598 bytes — sha256:de688118007583bf
+- `prompts/02_optimize_programming_guide_for_llm_prompt.md` — 6288 bytes — sha256:167f69d15d318160
+- `prompts/03_optimize_operator_manual_for_llm_prompt.md` — 6786 bytes — sha256:0444ce3505bb1533
+- `prompts/04_optimize_service_manual_for_llm_prompt.md` — 6366 bytes — sha256:c17c5969429d65ea
+- `prompts/05_extract_commands_txt_prompt.md` — 8836 bytes — sha256:dc253d1f312db1a6
+- `prompts/06_verify_manual_artifacts_quality_gate_prompt.md` — 2514 bytes — sha256:3ce92626358213ae
+- `prompts/07_create_command_coverage_prompt.md` — 7495 bytes — sha256:f835d1f1019ab315
+- `prompts/08_verify_command_coverage_quality_gate_prompt.md` — 2147 bytes — sha256:5109a3d656677550
+- `prompts/09_architecture_and_batches_prompt.md` — 6519 bytes — sha256:15a9b374a4df8ff3
+- `prompts/10_verify_architecture_before_code_quality_gate_prompt.md` — 1780 bytes — sha256:6ea1689d5cceee10
+- `prompts/11_implementation_batch_01_skeleton_common_status_prompt.md` — 7293 bytes — sha256:3033039671442873
+- `prompts/12_verify_implementation_batch_01_quality_gate_prompt.md` — 2823 bytes — sha256:cc740669e933b689
+- `prompts/13_implementation_batch_template_prompt.md` — 6867 bytes — sha256:13514ff2691c9277
+- `prompts/14_verify_each_implementation_batch_quality_gate_prompt.md` — 2834 bytes — sha256:80183cb80d0a57c2
+- `prompts/15_hardware_execution_decision_gate_prompt.md` — 1738 bytes — sha256:c35a407d9f7663ae
+- `prompts/16_safe_hardware_tests_prompt.md` — 6554 bytes — sha256:effb5109d465041a
+- `prompts/17_docs_and_final_cleanup_prompt.md` — 6240 bytes — sha256:116d40084998f078
+- `prompts/18_final_pr_audit_quality_gate_prompt.md` — 2486 bytes — sha256:3388e6e00e864660
+- `reference/AGENTS_upstream_uploaded.md` — 5854 bytes — sha256:2c4b21573bebc5b8
+- `templates/README_where_to_put_files.md` — 3099 bytes — sha256:99433c16e0af849c
+- `templates/codex_worklog_template.md` — 2005 bytes — sha256:bcd0fb2df4923b5c
+- `templates/command_coverage_template.md` — 4384 bytes — sha256:c455490c5ac95bfb

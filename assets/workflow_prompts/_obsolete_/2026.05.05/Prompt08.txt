@@ -1,0 +1,51 @@
+Pracujesz w lokalnym repozytorium PyMeasure.
+
+Cel: wykonaj audyt kompletności implementacji względem Programming Guide i Service Manual. Popraw tylko coverage/docs/test metadata, chyba że znajdziesz oczywisty brak testu dla już zaimplementowanej komendy.
+
+Pliki:
+- assets/<vendor>/<model>/command_coverage.md
+- assets/<vendor>/<model>/service_coverage.md
+- assets/<vendor>/<model>/architecture_plan.md
+- pymeasure/instruments/<vendor>/<model>.py
+- tests/instruments/<vendor>/test_<model>.py
+- tests/instruments/<vendor>/test_<model>_with_device.py
+- docs/api/instruments/<vendor>/<model>.rst
+
+Sprawdź:
+
+1. Każda komenda z Programming Guide ma wiersz w `command_coverage.md`.
+2. Każdy wiersz ma:
+   - Form
+   - Transport
+   - PyMeasure API decision
+   - Risk level
+   - Hardware-test policy
+   - Status
+3. Każda zaimplementowana komenda ma test expected_protocol.
+4. Każda hardware-tested komenda ma bezpieczną politykę hardware test.
+5. Destructive/service/calibration/power/factory commands nie są uruchamiane w automatycznych testach sprzętowych.
+6. Query-only nie są setterami.
+7. Command-only actions nie są `Instrument.control`.
+8. Data/block commands mają parser albo są deferred.
+9. Nie ma `includeSCPI=True`.
+10. Nie ma metod `get_*` / `set_*`.
+11. Docstringi zaczynają się od trybu rozkazującego.
+12. Walidatory mają zakresy z manuala, a nie zgadywane.
+13. Mapowania wartości mają dokładne tokeny z manuala.
+14. Service Manual nie wprowadził niepotwierdzonych komend.
+15. `service_coverage.md` rozróżnia operator-safe i service-only.
+
+Dodaj sekcję final summary do `command_coverage.md`:
+- total commands
+- implemented
+- protocol-tested
+- hardware-tested
+- unsafe
+- deferred
+- not-implemented
+- needs-verification
+
+Na końcu uruchom:
+python -m pytest tests/instruments/<vendor>/test_<model>.py -q
+git diff --check
+git diff --stat

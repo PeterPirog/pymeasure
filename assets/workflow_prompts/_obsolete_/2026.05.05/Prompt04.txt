@@ -1,0 +1,71 @@
+Pracujesz w lokalnym repozytorium PyMeasure.
+
+Cel: na podstawie `command_coverage.md` i manuali zaproponuj architekturę drivera PyMeasure. Nie implementuj jeszcze kodu.
+
+Pliki:
+- assets/<vendor>/<model>/command_coverage.md
+- assets/<vendor>/<model>/service_coverage.md
+- assets/<vendor>/<model>/programming_guide.md
+- assets/<vendor>/<model>/service_manual.md
+- pymeasure/instruments/<vendor>/, jeśli istnieje
+- tests/instruments/<vendor>/, jeśli istnieje
+
+Zaproponuj i zapisz w `assets/<vendor>/<model>/architecture_plan.md`:
+
+1. Instrument classification
+   - typ przyrządu
+   - interfejsy
+   - SCPI/IEEE-488.2/custom
+   - wymagane mixiny
+   - timeout/terminatory
+
+2. Class architecture
+   Wybierz:
+   - jedna klasa Instrument
+   - Instrument + Channel
+   - Instrument + Trace
+   - Instrument + Window
+   - Instrument + Source/Output subsystem
+   - ChannelCreator / MultiChannelCreator
+   - inne, tylko jeśli repozytorium ma podobny wzorzec
+
+3. PyMeasure inheritance
+   - dla SCPI: `class <ClassName>(SCPIMixin, Instrument)`
+   - nie używaj `includeSCPI=True`
+
+4. API mapping policy
+   - command/query → control
+   - query-only → measurement albo read method
+   - command-only → method
+   - data transfer → parser method
+   - unsafe/service → explicit method or not implemented
+
+5. Implementation batches
+   Podziel komendy na małe paczki, każda z:
+   - subsystem
+   - liczba komend
+   - ryzyko
+   - typ testów
+   - zależności
+
+6. Unsafe/deferred list
+   Wypisz komendy, których nie implementować w pierwszym PR.
+
+7. Required files
+   - pymeasure/instruments/<vendor>/<model>.py
+   - pymeasure/instruments/<vendor>/__init__.py
+   - tests/instruments/<vendor>/test_<model>.py
+   - tests/instruments/<vendor>/test_<model>_with_device.py
+   - docs/api/instruments/<vendor>/<model>.rst
+   - docs/api/instruments/<vendor>/index.rst
+
+Reguły:
+- Nie implementuj kodu.
+- Nie zmieniaj testów.
+- Nie zgaduj API dla komend `needs-verification`.
+- Preferuj styl istniejących sterowników w tym samym katalogu vendor.
+- Dla dużych przyrządów zaproponuj minimalny pierwszy PR: Common/Status + najbardziej użyteczne bezpieczne subsystemy.
+
+Na końcu uruchom:
+git diff --check
+git diff --stat

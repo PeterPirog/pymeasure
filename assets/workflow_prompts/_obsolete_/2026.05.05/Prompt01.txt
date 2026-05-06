@@ -1,0 +1,98 @@
+Pracujesz w lokalnym repozytorium PyMeasure.
+
+Cel: przygotuj robocze pliki coverage dla nowego przyrządu na podstawie Programming Guide i Service Manual. Nie implementuj jeszcze kodu sterownika.
+
+Parametry przyrządu:
+- Vendor: <vendor>
+- Model: <model>
+- Planned class name: <ClassName>
+
+Pliki wejściowe:
+- assets/<vendor>/<model>/programming_guide.md
+- assets/<vendor>/<model>/service_manual.md
+- opcjonalnie: assets/<vendor>/<model>/commands.txt
+- opcjonalnie: assets/<vendor>/<model>/operation_manual.md
+
+Utwórz lub zaktualizuj:
+- assets/<vendor>/<model>/command_coverage.md
+- assets/<vendor>/<model>/service_coverage.md
+- assets/<vendor>/<model>/codex_worklog.md, jeśli nie istnieje
+
+W `command_coverage.md` przygotuj strukturę:
+
+1. Metadata
+   - vendor
+   - model
+   - instrument type
+   - interface/protocol
+   - manual sources
+   - firmware/options assumptions
+   - extraction status
+
+2. Status legend
+   Użyj statusów:
+   - todo
+   - implemented
+   - protocol-tested
+   - hardware-tested
+   - unsafe
+   - deferred
+   - not-implemented
+   - needs-verification
+   - needs-operator-decision
+
+3. Command coverage table
+   Kolumny:
+   | ID | Subsystem | Manual section | Command | Canonical syntax | Form | SCPI/common/custom | Transport | Parameters | Return format | PyMeasure API decision | Proposed Python API | Validator / mapping | Parser needed | Risk level | Hardware-test policy | Protocol test | Hardware test | Status | Notes |
+
+4. Implementation batches
+   Typowy podział:
+   - Skeleton/Common/Status
+   - System/Error/Options
+   - Input/Channel
+   - Output/Source
+   - Trigger/Arm/Initiate
+   - Sense/Measure/Acquire
+   - Calculate/Trace/Data transfer
+   - Display/Marker/Window
+   - Memory/MMEM/File/Program
+   - Calibration/Test/Service
+   - Documentation/final cleanup
+
+W `service_coverage.md` przygotuj strukturę:
+
+1. Service manual metadata
+2. Safety classification table
+3. Service procedures table
+4. Service-derived driver constraints
+5. Service-related remote commands
+6. Do-not-implement-from-service-manual
+7. Hardware-test policy
+8. Operator confirmation checklist
+
+Reguły:
+- Nie wymyślaj komend.
+- Programming Guide jest źródłem składni zdalnej.
+- Service Manual jest źródłem bezpieczeństwa, procedur, ograniczeń i ryzyka.
+- Jeżeli Service Manual opisuje procedurę bez jawnej komendy z Programming Guide, oznacz ją jako `service-only / not implemented`.
+- Oznacz jako ryzykowne komendy związane z:
+  - calibration
+  - adjustment
+  - self-test long
+  - clear/delete/format/store
+  - memory initialize
+  - power off/reboot
+  - factory/service password
+  - firmware update
+  - network/GPIB address change
+  - nonvolatile settings
+  - output enable / high voltage / high current / RF output
+  - relay switching affecting DUT
+  - source output affecting external load
+
+Na końcu uruchom:
+python -m pytest tests/instruments/<vendor>/test_<model>.py -q
+git diff --check
+git diff --stat
+
+Jeżeli test path jeszcze nie istnieje, nie traktuj tego jako błąd krytyczny; odnotuj to w codex_worklog.md.

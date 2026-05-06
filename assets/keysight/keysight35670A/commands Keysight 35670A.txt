@@ -1,0 +1,1992 @@
+Agilent/Keysight 35670A Dynamic Signal Analyzer — commands.txt
+Generated for PyMeasure driver planning.
+
+Source:
+- Agilent 35670A Dynamic Signal Analyzer, GPIB Programming with the Agilent 35670A,
+  Appendix A: Agilent 35670A Command Summary.
+- The manual states that Appendix A contains all GPIB commands recognized by the Agilent 35670A
+  and that all commands have a query form unless marked "command only" or "query only".
+
+Legend:
+- command only   = command has no query form.
+- query only     = query has no command/set form.
+- command/query  = command form exists; append "?" for query form.
+- [1|2|3|4]      = command is indexed by trace/window/channel number.
+- [:...]         = optional SCPI node.
+- [SENSe:]       = SENSe prefix is optional according to the manual.
+
+Counts:
+- Canonical command reference entries extracted from TOC: 430
+- Appendix A parsed table entries: 428
+
+WARNING FOR CODEX:
+Use this file as the command inventory only. Do not blindly implement every command as Instrument.control.
+Command-only operations should become methods. Query-only operations should become Instrument.measurement
+or read methods. Large-data/block-transfer commands need dedicated parsers.
+
+
+# SECTION 1 — CANONICAL COMMAND INDEX FROM COMMAND REFERENCE TOC
+
+[CHAPTER 3: Common Commands]
+*CAL?                                                                       | query only
+*CLS                                                                        | command only
+*ESE                                                                        | command/query
+*ESR?                                                                       | query only
+*IDN?                                                                       | query only
+*OPC                                                                        | command/query
+*OPT?                                                                       | query only
+*PCB                                                                        | command only
+*PSC                                                                        | command/query
+*RST                                                                        | command only
+*SRE                                                                        | command/query
+*STB?                                                                       | query only
+*TRG                                                                        | command only
+*TST?                                                                       | query only
+*WAI                                                                        | command only
+
+[CHAPTER 4: ABORt]
+ABORt                                                                       | command only
+
+[CHAPTER 5: ARM]
+ARM[:IMMediate]                                                             | command only
+ARM:RPM:INCRement                                                           | command/query
+ARM:RPM:MODE                                                                | command/query
+ARM:RPM:THReshold                                                           | command/query
+ARM:SOURce                                                                  | command/query
+ARM:TIMer                                                                   | command/query
+
+[CHAPTER 6: CALCulate]
+CALCulate[1|2|3|4]:ACTive                                                   | command/query
+CALCulate[1|2|3|4]:CFIT:ABORt                                               | command only
+CALCulate[1|2|3|4]:CFIT:COPY                                                | command only
+CALCulate[1|2|3|4]:CFIT:DATA                                                | command/query
+CALCulate[1|2|3|4]:CFIT:DESTination                                         | command/query
+CALCulate[1|2|3|4]:CFIT:FREQuency[:AUTO]                                    | command/query
+CALCulate[1|2|3|4]:CFIT:FREQuency:STARt                                     | command/query
+CALCulate[1|2|3|4]:CFIT:FREQuency:STOP                                      | command/query
+CALCulate[1|2|3|4]:CFIT:FSCale                                              | command/query
+CALCulate[1|2|3|4]:CFIT[:IMMediate]                                         | command only
+CALCulate[1|2|3|4]:CFIT:ORDer:AUTO                                          | command/query
+CALCulate[1|2|3|4]:CFIT:ORDer:POLes                                         | command/query
+CALCulate[1|2|3|4]:CFIT:ORDer:ZERos                                         | command/query
+CALCulate[1|2|3|4]:CFIT:TDELay                                              | command/query
+CALCulate[1|2|3|4]:CFIT:WEIGht:AUTO                                         | command/query
+CALCulate[1|2|3|4]:CFIT:WEIGht:REGister                                     | command/query
+CALCulate[1|2|3|4]:DATA?                                                    | query only
+CALCulate[1|2|3|4]:DATA:HEADer:POINts                                       | query only
+CALCulate[1|2|3|4]:FEED                                                     | command/query
+CALCulate[1|2|3|4]:FORMat                                                   | command/query
+CALCulate[1|2|3|4]:GDAPerture:APERture                                      | command/query
+CALCulate[1|2|3|4]:LIMit:BEEP[:STATe]                                       | command/query
+CALCulate[1|2|3|4]:LIMit:FAIL?                                              | query only
+CALCulate[1|2|3|4]:LIMit:LOWer:CLEar[:IMMediate]                            | command only
+CALCulate[1|2|3|4]:LIMit:LOWer:MOVE:Y                                       | command only
+CALCulate[1|2|3|4]:LIMit:LOWer:REPort[:DATA]?                               | query only
+CALCulate[1|2|3|4]:LIMit:LOWer:REPort:YDATa?                                | query only
+CALCulate[1|2|3|4]:LIMit:LOWer:SEGMent                                      | command/query
+CALCulate[1|2|3|4]:LIMit:LOWer:SEGMent:CLEar                                | command only
+CALCulate[1|2|3|4]:LIMit:LOWer:TRACe[:IMMediate]                            | command only
+CALCulate[1|2|3|4]:LIMit:STATe                                              | command/query
+CALCulate[1|2|3|4]:LIMit:UPPer:CLEar[:IMMediate]                            | command only
+CALCulate[1|2|3|4]:LIMit:UPPer:MOVE:Y                                       | command only
+CALCulate[1|2|3|4]:LIMit:UPPer:REPort[:DATA]?                               | query only
+CALCulate[1|2|3|4]:LIMit:UPPer:REPort:YDATa?                                | query only
+CALCulate[1|2|3|4]:LIMit:UPPer:SEGMent                                      | command/query
+CALCulate[1|2|3|4]:LIMit:UPPer:SEGMent:CLEar                                | command only
+CALCulate[1|2|3|4]:LIMit:UPPer:TRACe[:IMMediate]                            | command only
+CALCulate[1|2|3|4]:MARKer:BAND:STARt                                        | command/query
+CALCulate[1|2|3|4]:MARKer:BAND:STOP                                         | command/query
+CALCulate[1|2|3|4]:MARKer:COUPled[:STATe]                                   | command/query
+CALCulate[1|2|3|4]:MARKer:DTABle:CLEar[:IMMediate]                          | command only
+CALCulate[1|2|3|4]:MARKer:DTABle:COPY[1|2|3|4]                              | command only
+CALCulate[1|2|3|4]:MARKer:DTABle[:DATA]?                                    | query only
+CALCulate[1|2|3|4]:MARKer:DTABle:X[:DATA]?                                  | query only
+CALCulate[1|2|3|4]:MARKer:DTABle:X:DELete                                   | command only
+CALCulate[1|2|3|4]:MARKer:DTABle:X:INSert                                   | command/query
+CALCulate[1|2|3|4]:MARKer:DTABle:X:LABel                                    | command/query
+CALCulate[1|2|3|4]:MARKer:DTABle:X:SELect[:POINt]                           | command/query
+CALCulate[1|2|3|4]:MARKer:FUNCtion                                          | command/query
+CALCulate[1|2|3|4]:MARKer:FUNCtion:RESult?                                  | query only
+CALCulate[1|2|3|4]:MARKer:HARMonic:COUNt                                    | command/query
+CALCulate[1|2|3|4]:MARKer:HARMonic:FUNDamental                              | command/query
+CALCulate[1|2|3|4]:MARKer:MAXimum[:GLOBal]                                  | command only
+CALCulate[1|2|3|4]:MARKer:MAXimum[:GLOBal]:TRACk                            | command/query
+CALCulate[1|2|3|4]:MARKer:MAXimum:LEFT                                      | command only
+CALCulate[1|2|3|4]:MARKer:MAXimum:RIGHt                                     | command only
+CALCulate[1|2|3|4]:MARKer:MODE                                              | command/query
+CALCulate[1|2|3|4]:MARKer:POSition                                          | command/query
+CALCulate[1|2|3|4]:MARKer:POSition:POINt                                    | command/query
+CALCulate[1|2|3|4]:MARKer:REFerence:X                                       | command/query
+CALCulate[1|2|3|4]:MARKer:REFerence:Y                                       | command/query
+CALCulate[1|2|3|4]:MARKer:SIDeband:CARRier                                  | command/query
+CALCulate[1|2|3|4]:MARKer:SIDeband:COUNt                                    | command/query
+CALCulate[1|2|3|4]:MARKer:SIDeband:INCRement                                | command/query
+CALCulate[1|2|3|4]:MARKer[:STATe]                                           | command/query
+CALCulate[1|2|3|4]:MARKer:X[:ABSolute]                                      | command/query
+CALCulate[1|2|3|4]:MARKer:X:RELative                                        | command/query
+CALCulate[1|2|3|4]:MARKer:Y[:ABSolute]?                                     | query only
+CALCulate[1|2|3|4]:MARKer:Y:RELative                                        | command/query
+CALCulate[1|2|3|4]:MATH:CONStant[1|2|3|4|5]                                 | command/query
+CALCulate[1|2|3|4]:MATH:DATA                                                | command/query
+CALCulate[1|2|3|4]:MATH[:EXPRession[1|2|3|4|5]]                             | command/query
+CALCulate[1|2|3|4]:MATH:SELect                                              | command/query
+CALCulate[1|2|3|4]:MATH:STATe                                               | command/query
+CALCulate[1|2|3|4]:SYNThesis:COPY                                           | command only
+CALCulate[1|2|3|4]:SYNThesis:DATA                                           | command/query
+CALCulate[1|2|3|4]:SYNThesis:DESTination                                    | command/query
+CALCulate[1|2|3|4]:SYNThesis:FSCale                                         | command/query
+CALCulate[1|2|3|4]:SYNThesis:GAIN                                           | command/query
+CALCulate[1|2|3|4]:SYNThesis[:IMMediate]                                    | command only
+CALCulate[1|2|3|4]:SYNThesis:SPACing                                        | command/query
+CALCulate[1|2|3|4]:SYNThesis:TDELay                                         | command/query
+CALCulate[1|2|3|4]:SYNThesis:TTYPe                                          | command/query
+CALCulate[1|2|3|4]:UNIT:AMPLitude                                           | command/query
+CALCulate[1|2|3|4]:UNIT:ANGLe                                               | command/query
+CALCulate[1|2|3|4]:UNIT:DBReference                                         | command/query
+CALCulate[1|2|3|4]:UNIT:DBReference:IMPedance                               | command/query
+CALCulate[1|2|3|4]:UNIT:DBReference:USER:LABel                              | command/query
+CALCulate[1|2|3|4]:UNIT:DBReference:USER:REFerence                          | command/query
+CALCulate[1|2|3|4]:UNIT:MECHanical                                          | command/query
+CALCulate[1|2|3|4]:UNIT:VOLTage                                             | command/query
+CALCulate[1|2|3|4]:UNIT:X                                                   | command/query
+CALCulate[1|2|3|4]:UNIT:X:ORDer:FACTor                                      | command/query
+CALCulate[1|2|3|4]:UNIT:X:USER:FREQuency:FACTor                             | command/query
+CALCulate[1|2|3|4]:UNIT:X:USER:FREQuency:LABel                              | command/query
+CALCulate[1|2|3|4]:UNIT:X:USER:TIME:FACTor                                  | command/query
+CALCulate[1|2|3|4]:UNIT:X:USER:TIME:LABel                                   | command/query
+CALCulate[1|2|3|4]:WATerfall:COUNt                                          | command/query
+CALCulate[1|2|3|4]:WATerfall[:DATA]?                                        | query only
+CALCulate[1|2|3|4]:WATerfall:SLICe:COPY                                     | command only
+CALCulate[1|2|3|4]:WATerfall:SLICe:SELect                                   | command/query
+CALCulate[1|2|3|4]:WATerfall:SLICe:SELect:POINt                             | command/query
+CALCulate[1|2|3|4]:WATerfall:TRACe:COPY                                     | command only
+CALCulate[1|2|3|4]:WATerfall:TRACe:SELect                                   | command/query
+CALCulate[1|2|3|4]:WATerfall:TRACe:SELect:POINt                             | command/query
+CALCulate[1|2|3|4]:X:DATA?                                                  | query only
+
+[CHAPTER 7: CALibration]
+CALibration[:ALL]?                                                          | query only
+CALibration:AUTO                                                            | command/query
+
+[CHAPTER 8: DISPlay]
+DISPlay:ANNotation[:ALL]                                                    | command/query
+DISPlay:BODE                                                                | command only
+DISPlay:BRIGhtness                                                          | command/query
+DISPlay:ERRor                                                               | command only
+DISPlay:EXTernal[:STATe]                                                    | command/query
+DISPlay:FORMat                                                              | command/query
+DISPlay:GPIB:ECHO                                                           | command/query
+DISPlay:PROGram:KEY:BOX                                                     | command/query
+DISPlay:PROGram:KEY:BRACket                                                 | command/query
+DISPlay:PROGram[:MODE]                                                      | command/query
+DISPlay:PROGram:VECTor:BUFFer[:STATe]                                       | command/query
+DISPlay:RPM[:STATe]                                                         | command/query
+DISPlay:SHOWall[:STATe]                                                     | command/query
+DISPlay:STATe                                                               | command/query
+DISPlay:TCAPture:ENVelope[:STATe]                                           | command/query
+DISPlay:VIEW                                                                | command/query
+DISPlay[:WINDow[1|2|3|4]]:DTABle:MARKer[:STATe]                             | command/query
+DISPlay[:WINDow[1|2|3|4]]:DTABle[:STATe]                                    | command/query
+DISPlay[:WINDow[1|2|3|4]]:LIMit:STATe                                       | command/query
+DISPlay[:WINDow[1|2|3|4]]:POLar:CLOCkwise                                   | command/query
+DISPlay[:WINDow[1|2|3|4]]:POLar:ROTation                                    | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:APOWer[:STATe]                              | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:BPOWer[:STATe]                              | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:GRATicule:GRID[:STATe]                      | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:LABel                                       | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:LABel:DEFault[:STATe]                       | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:X:MATCh[1|2|3|4]                            | command only
+DISPlay[:WINDow[1|2|3|4]]:TRACe:X[:SCALe]:AUTO                              | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:X[:SCALe]:LEFT                              | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:X[:SCALe]:RIGHt                             | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:X:SPACing                                   | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:Y:MATCh[1|2|3|4]                            | command only
+DISPlay[:WINDow[1|2|3|4]]:TRACe:Y[:SCALe]:AUTO                              | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:Y[:SCALe]:BOTTom                            | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:Y[:SCALe]:CENTer                            | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:Y[:SCALe]:PDIVision                         | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:Y[:SCALe]:REFerence                         | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:Y[:SCALe]:TOP                               | command/query
+DISPlay[:WINDow[1|2|3|4]]:TRACe:Y:SPACing                                   | command/query
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:BASeline                                | command/query
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:BOTTom                                  | command/query
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:COUNt                                   | command/query
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:HEIGht                                  | command/query
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:HIDDen                                  | command/query
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:SKEW                                    | command/query
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:SKEW:ANGLe                              | command/query
+DISPlay[:WINDow[1|2|3|4]]:WATerfall[:STATe]                                 | command/query
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:TOP                                     | command/query
+
+[CHAPTER 9: FORMat]
+FORMat[:DATA]                                                               | command/query
+
+[CHAPTER 10: HCOPy]
+HCOPy:COLor:DEFault                                                         | command only
+HCOPy:DESTination                                                           | command/query
+HCOPy:DEVice:LANGuage                                                       | command/query
+HCOPy:DEVice:RESolution                                                     | command/query
+HCOPy:DEVice:SPEed                                                          | command/query
+HCOPy[:IMMediate]                                                           | command only
+HCOPy:ITEM:FFEed:STATe                                                      | command/query
+HCOPy:ITEM:LABel:COLor                                                      | command/query
+HCOPy:ITEM:LABel:STATe                                                      | command/query
+HCOPy:ITEM:LABel:TEXT                                                       | command/query
+HCOPy:ITEM:TDSTamp:FORMat                                                   | command/query
+HCOPy:ITEM:TDSTamp:STATe                                                    | command/query
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:COLor                                    | command/query
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:GRATicule:COLor                          | command/query
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:LIMit:LTYPe                              | command/query
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:LTYPe                                    | command/query
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:MARKer:COLor                             | command/query
+HCOPy:PAGE:DIMensions:AUTO                                                  | command/query
+HCOPy:PAGE:DIMensions:USER:LLEFt                                            | command/query
+HCOPy:PAGE:DIMensions:USER:URIGht                                           | command/query
+HCOPy:PLOT:ADDRess                                                          | command/query
+HCOPy:PRINt:ADDRess                                                         | command/query
+HCOPy:TITLe[1|2]                                                            | command/query
+HCOPy:SOURce                                                                | command/query
+
+[CHAPTER 11: INITiate]
+INITiate:CONTinuous                                                         | command/query
+INITiate[:IMMediate]                                                        | command only
+
+[CHAPTER 12: INPut]
+INPut[1|2|3|4]:BIAS[:STATe]                                                 | command/query
+INPut[1|2|3|4]:COUPling                                                     | command/query
+INPut[1|2|3|4]:FILTer:AWEighting[:STATe]                                    | command/query
+INPut[1|2|3|4]:FILTer[:LPASs][:STATe]                                       | command/query
+INPut[1|2|3|4]:LOW                                                          | command/query
+INPut[1|2|3|4]:REFerence:DIRection                                          | command/query
+INPut[1|2|3|4]:REFerence:POINt                                              | command/query
+INPut[1|2|3|4][:STATe]                                                      | command/query
+
+[CHAPTER 13: INSTrument]
+INSTrument:NSELect                                                          | command/query
+INSTrument[:SELect]                                                         | command/query
+
+[CHAPTER 14: MEMory]
+MEMory:CATalog[:ALL]?                                                       | query only
+MEMory:CATalog:NAME?                                                        | query only
+MEMory:DELete:ALL                                                           | command only
+MEMory:DELete[:NAME]                                                        | command only
+MEMory:FREE[:ALL]?                                                          | query only
+
+[CHAPTER 15: MMEMory]
+MMEMory:COPY                                                                | command only
+MMEMory:DELete                                                              | command only
+MMEMory:DISK:ADDRess                                                        | command/query
+MMEMory:DISK:UNIT                                                           | command/query
+MMEMory:FSYStem?                                                            | query only
+MMEMory:INITialize                                                          | command only
+MMEMory:LOAD:CFIT                                                           | command only
+MMEMory:LOAD:CONTinue                                                       | command/query
+MMEMory:LOAD:DTABle:TRACe[1|2|3|4]                                          | command only
+MMEMory:LOAD:LIMit:LOWer:TRACe[1|2|3|4]                                     | command only
+MMEMory:LOAD:LIMit:UPPer:TRACe[1|2|3|4]                                     | command only
+MMEMory:LOAD:MATH                                                           | command only
+MMEMory:LOAD:PROGram                                                        | command only
+MMEMory:LOAD:STATe                                                          | command only
+MMEMory:LOAD:SYNThesis                                                      | command only
+MMEMory:LOAD:TCAPture                                                       | command only
+MMEMory:LOAD:TRACe                                                          | command only
+MMEMory:LOAD:WATerfall                                                      | command only
+MMEMory:MDIRectory                                                          | command only
+MMEMory:MOVE                                                                | command only
+MMEMory:MSIS                                                                | command/query
+MMEMory:NAME                                                                | command/query
+MMEMory:STORe:CFIT                                                          | command only
+MMEMory:STORe:CONTinue                                                      | command/query
+MMEMory:STORe:DTABle:TRACe[1|2|3|4]                                         | command only
+MMEMory:STORe:LIMit:LOWer:TRACe[1|2|3|4]                                    | command only
+MMEMory:STORe:LIMit:UPPer:TRACe[1|2|3|4]                                    | command only
+MMEMory:STORe:MATH                                                          | command only
+MMEMory:STORe:PROGram                                                       | command only
+MMEMory:STORe:PROGram:FORMat                                                | command/query
+MMEMory:STORe:STATe                                                         | command only
+MMEMory:STORe:SYNThesis                                                     | command only
+MMEMory:STORe:TCAPture                                                      | command only
+MMEMory:STORe:TRACe                                                         | command only
+MMEM:STORe:TRACe:FORMat                                                     | command/query
+MMEMory:STORe:WATerfall                                                     | command only
+
+[CHAPTER 16: OUTPut]
+OUTPut:FILTer[:LPASs][:STATe]                                               | command/query
+OUTPut[:STATe]                                                              | command/query
+
+[CHAPTER 17: PROGram]
+PROGram:EDIT:ENABle                                                         | command/query
+PROGram:EXPLicit:DEFine                                                     | command/query
+PROGram:EXPLicit:LABel                                                      | command/query
+PROGram[:SELected]:DEFine                                                   | command/query
+PROGram[:SELected]:DELete:ALL                                               | command only
+PROGram[:SELected]:DELete[:SELected]                                        | command only
+PROGram[:SELected]:LABel                                                    | command/query
+PROGram[:SELected]:MALLocate                                                | command/query
+PROGram[:SELected]:NAME                                                     | command/query
+PROGram[:SELected]:NUMBer                                                   | command/query
+PROGram[:SELected]:STATe                                                    | command/query
+PROGram[:SELected]:STRing                                                   | command/query
+
+[CHAPTER 18: [SENSe:]]
+[SENSe:]AVERage:CONFidence                                                  | command/query
+[SENSe:]AVERage:COUNt                                                       | command/query
+[SENSe:]AVERage:HOLD                                                        | command/query
+[SENSe:]AVERage:IMPulse                                                     | command/query
+[SENSe:]AVERage:IRESult:RATE                                                | command/query
+[SENSe:]AVERage:IRESult[:STATe]                                             | command/query
+[SENSe:]AVERage:PREView                                                     | command/query
+[SENSe:]AVERage:PREView:ACCept                                              | command only
+[SENSe:]AVERage:PREView:REJect                                              | command only
+[SENSe:]AVERage:PREView:TIME                                                | command/query
+[SENSe:]AVERage:TCONtrol                                                    | command/query
+[SENSe:]AVERage:TIME                                                        | command/query
+[SENSe:]AVERage:TYPE                                                        | command/query
+[SENSe:]DATA                                                                | command/query
+[SENSE:]DATA:HEADer:FREQuency:STARt?                                        | query only
+[SENSE:]DATA:HEADer:FREQuency:STOP?                                         | query only
+[SENSe:]DATA:RANGe                                                          | command/query
+[SENSe:]FEED                                                                | command/query
+[SENSe:]FREQuency:BLOCksize                                                 | command/query
+[SENSe:]FREQuency:CENTer                                                    | command/query
+[SENSe:]FREQuency:MANual                                                    | command/query
+[SENSe:]FREQuency:RESolution                                                | command/query
+[SENSe:]FREQuency:RESolution:AUTO                                           | command/query
+[SENSe:]FREQuency:RESolution:AUTO:MCHange                                   | command/query
+[SENSe:]FREQuency:RESolution:AUTO:MINimum                                   | command/query
+[SENSe:]FREQuency:RESolution:OCTave                                         | command/query
+[SENSe:]FREQuency:SPAN                                                      | command/query
+[SENSe:]FREQuency:SPAN:FULL                                                 | command only
+[SENSe:]FREQuency:SPAN:LINK                                                 | command/query
+[SENSe:]FREQuency:STARt                                                     | command/query
+[SENSe:]FREQuency:STEP[:INCRement]                                          | command/query
+[SENSe:]FREQuency:STOP                                                      | command/query
+[SENSe:]HISTogram:BINS                                                      | command/query
+[SENSe:]ORDer:MAXimum                                                       | command/query
+[SENSe:]ORDer:RESolution                                                    | command/query
+[SENSe:]ORDer:RESolution:TRACk                                              | command/query
+[SENSe:]ORDer:RPM:MAXimum                                                   | command/query
+[SENSe:]ORDer:RPM:MINimum                                                   | command/query
+[SENSe:]ORDer:TRACk[1|2|3|4|5]                                              | command/query
+[SENSe:]ORDer:TRACk[1|2|3|4|5]:STATe                                        | command/query
+[SENSe:]REFerence                                                           | command/query
+[SENSe:]REJect:STATe                                                        | command/query
+[SENSe:]SWEep:DIRection                                                     | command/query
+[SENSe:]SWEep:DWELl                                                         | command/query
+[SENSe:]SWEep:MODE                                                          | command/query
+[SENSe:]SWEep:OVERlap                                                       | command/query
+[SENSe:]SWEep:SPACing                                                       | command/query
+[SENSe:]SWEep:STIMe                                                         | command/query
+[SENSe:]SWEep:TIME                                                          | command/query
+[SENSe:]TCAPture:ABORt                                                      | command only
+[SENSe:]TCAPture:DELete                                                     | command only
+[SENSe:]TCAPture:FILE                                                       | command/query
+[SENSe:]TCAPture[:IMMediate]                                                | command only
+[SENSe:]TCAPture:LENGth                                                     | command/query
+[SENSe:]TCAPture:MALLocate                                                  | command only
+[SENSe:]TCAPture:STARt[1|2|3|4]                                             | command/query
+[SENSe:]TCAPture:STOP[1|2|3|4]                                              | command/query
+[SENSe:]TCAPture:TACHometer:RPM:MAXimum                                     | command/query
+[SENSe:]TCAPture:TACHometer[:STATe]                                         | command/query
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:AUTO                                    | command/query
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:AUTO:DIRection                          | command/query
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:USER:LABel                         | command/query
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:USER:SFACtor                       | command/query
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:USER[:STATe]                       | command/query
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:XDCR:LABel                         | command/query
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe[:UPPer]                                 | command/query
+[SENSe:]WINDow[1|2|3|4]:EXPonential                                         | command/query
+[SENSe:]WINDow[1|2|3|4]:FORCe                                               | command/query
+[SENSe:]WINDow[1|2|3|4]:ORDer:DC                                            | command/query
+[SENSe:]WINDow[1|2|3|4][:TYPE]                                              | command/query
+
+[CHAPTER 19: SOURce]
+SOURce:BURSt                                                                | command/query
+SOURce:FREQuency[:CW]                                                       | command/query
+SOURce:FREQuency:FIXed                                                      | command/query
+SOURce:FUNCtion[:SHAPe]                                                     | command/query
+SOURce:USER:CAPTure                                                         | command/query
+SOURce:USER[:REGister]                                                      | command/query
+SOURce:USER:REPeat                                                          | command/query
+SOURce:VOLTage[:LEVel]:AUTO                                                 | command/query
+SOURce:VOLTage[:LEVel][:IMMediate][:AMPLitude]                              | command/query
+SOURce:VOLTage[:LEVel][:IMMediate]:OFFSet                                   | command/query
+SOURce:VOLTage[:LEVel]:REFerence                                            | command/query
+SOURce:VOLTage[:LEVel]:REFerence:CHANnel                                    | command/query
+SOURce:VOLTage[:LEVel]:REFerence:TOLerance                                  | command/query
+SOURce:VOLTage:LIMit[:AMPLitude]                                            | command/query
+SOURce:VOLTage:LIMit:INPut                                                  | command/query
+SOURce:VOLTage:SLEW                                                         | command/query
+
+[CHAPTER 20: STATus]
+STATus:DEVice:CONDition?                                                    | query only
+STATus:DEVice:ENABle                                                        | command/query
+STATus:DEVice[:EVENt]?                                                      | query only
+STATus:DEVice:NTRansition                                                   | command/query
+STATus:DEVice:PTRansition                                                   | command/query
+STATus:OPERation:CONDition?                                                 | query only
+STATus:OPERation:ENABle                                                     | command/query
+STATus:OPERation[:EVENt]?                                                   | query only
+STATus:OPERation:NTRansition                                                | command/query
+STATus:OPERation:PTRansition                                                | command/query
+STATus:PRESet                                                               | command only
+STATus:QUEStionable:CONDition?                                              | query only
+STATus:QUEStionable:ENABle                                                  | command/query
+STATus:QUEStionable[:EVENt]?                                                | query only
+STATus:QUEStionable:LIMit:CONDition?                                        | query only
+STATus:QUEStionable:LIMit:ENABle                                            | command/query
+STATus:QUEStionable:LIMit[:EVENt]?                                          | query only
+STATus:QUEStionable:LIMit:NTRansition                                       | command/query
+STATus:QUEStionable:LIMit:PTRansition                                       | command/query
+STATus:QUEStionable:NTRansition                                             | command/query
+STATus:QUEStionable:PTRansition                                             | command/query
+STATus:QUEStionable:VOLTage:CONDition?                                      | query only
+STATus:QUEStionable:VOLTage:ENABle                                          | command/query
+STATus:QUEStionable:VOLTage[:EVENt]?                                        | query only
+STATus:QUEStionable:VOLTage:NTRansition                                     | command/query
+STATus:QUEStionable:VOLTage:PTRansition                                     | command/query
+STATus:USER:ENABle                                                          | command/query
+STATus:USER[:EVENt]?                                                        | query only
+STATus:USER:PULSe                                                           | command only
+
+[CHAPTER 21: SYSTem]
+SYSTem:BEEPer[:IMMediate]                                                   | command only
+SYSTem:BEEPer:STATe                                                         | command/query
+SYSTem:COMMunicate:GPIB[:SELF]:ADDRess                                      | command/query
+SYSTem:COMMunicate:SERial[:RECeive]:BAUD                                    | command/query
+SYSTem:COMMunicate:SERial[:RECeive]:BITS                                    | command/query
+SYSTem:COMMunicate:SERial[:RECeive]:PACE                                    | command/query
+SYSTem:COMMunicate:SERial[:RECeive]:PARity:CHECk                            | command/query
+SYSTem:COMMunicate:SERial[:RECeive]:PARity[:TYPE]                           | command/query
+SYSTem:COMMunicate:SERial[:RECeive]:SBITs                                   | command/query
+SYSTem:COMMunicate:SERial:TRANsmit:PACE                                     | command/query
+SYSTem:DATE                                                                 | command/query
+SYSTem:ERRor?                                                               | query only
+SYSTem:FAN[:STATe]                                                          | command/query
+SYSTem:FLOG:CLEar                                                           | command only
+SYSTem:KEY                                                                  | command/query
+SYSTem:KLOCk                                                                | command/query
+SYSTem:POWer:SOURce?                                                        | query only
+SYSTem:POWer:STATe                                                          | command/query
+SYSTem:PRESet                                                               | command only
+SYSTem:SET                                                                  | command/query
+SYSTem:TIME                                                                 | command/query
+SYSTem:VERSion?                                                             | query only
+
+[CHAPTER 22: TEST]
+TEST:LOG:CLEar                                                              | command only
+TEST:LONG                                                                   | command only
+TEST:LONG:RESult?                                                           | query only
+
+[CHAPTER 23: TRACe]
+TRACe[:DATA]                                                                | command/query
+TRACe:WATerfall[:DATA]                                                      | command/query
+TRACe:X[:DATA]?                                                             | query only
+TRACe:X:UNIT?                                                               | query only
+TRACe:Z:UNIT?                                                               | query only
+
+[CHAPTER 24: TRIGger]
+TRIGger:EXTernal:FILTer[:LPAS][:STATe]                                      | command/query
+TRIGger:EXTernal:LEVel                                                      | command/query
+TRIGger:EXTernal:RANGe                                                      | command/query
+TRIGger[:IMMediate]                                                         | command only
+TRIGger:LEVel                                                               | command/query
+TRIGger:SLOPe                                                               | command/query
+TRIGger:SOURce                                                              | command/query
+TRIGger:STARt[1|2|3|4]                                                      | command/query
+TRIGger:TACHometer:HOLDoff                                                  | command/query
+TRIGger:TACHometer:LEVel                                                    | command/query
+TRIGger:TACHometer:PCOunt                                                   | command/query
+TRIGger:TACHometer:RANGe                                                    | command/query
+TRIGger:TACHometer[:RPM]?                                                   | query only
+TRIGger:TACHometer:SLOPe                                                    | command/query
+
+
+# SECTION 2 — PARSED APPENDIX A COMMAND SUMMARY
+# Columns: command | form | short description from Appendix A
+*CAL?                                                                       | query only    | Calibrates the analyzer and returns the result
+*CLS                                                                        | command only  | Clears the Status Byte by emptying the error queue and clearing all event registers
+*ESE                                                                        | command/query | Sets bits in the Standard Event enable register
+*ESR?                                                                       | query only    | Reads and clears the Standard Event event register
+*IDN?                                                                       | query only    | Returns a string that uniquely identifies the analyzer
+*OPC                                                                        | command/query | Sets or queries completion of all pending overlapped commands
+*OPT?                                                                       | query only    | Returns a string that identifies the analyzer’s option configuration
+*PCB                                                                        | command only  | Sets the pass-control-back address
+*PSC                                                                        | command/query | Sets the state of the Power-on Status Clear flag
+*RST                                                                        | command only  | Executes a device reset
+*SRE                                                                        | command/query | Sets bits in the Service Request enable register
+*STB?                                                                       | query only    | Reads the Status Byte register
+*TRG                                                                        | command only  | Triggers the analyzer when TRIG:SOUR is BUS
+*TST?                                                                       | query only    | Tests the analyzer hardware and returns the results
+*WAI                                                                        | command only  | Holds off processing of subsequent commands until all preceding commands have been processed
+ABORt                                                                       | command only  | Stops the current measurement in progress
+ARM[:IMMediate]                                                             | command only  | Arms the trigger if ARM:SOUR is MAN
+ARM:RPM:INCRement                                                           | command/query | Specifies the number of RPM in a step for RPM step arming
+ARM:RPM:MODE                                                                | command/query | Enables the Start RPM Arming qualifier
+ARM:RPM:THReshold                                                           | command/query | Specifies the starting RPM value
+ARM:SOURce                                                                  | command/query | Specifies the type of arming for the analyzer’s trigger
+ARM:TIMer                                                                   | command/query | Specifies the size of the step used in time step arming
+CALCulate[1|2|3|4]:ACTive                                                   | command/query | Selects the active trace(s)
+CALC[1|2|3|4]:CFIT:ABORt                                                    | command only  | Aborts the curve fit operation
+CALC[1|2|3|4]:CFIT:COPY                                                     | command only  | Copies the synthesis table into the curve-fit table
+CALC[1|2|3|4]:CFIT:DATA                                                     | command/query | Loads values into the curve fit table
+CALC[1|2|3|4]:CFIT:DESTination                                              | command/query | Selects the data register for the results of the curve fit
+CALC[1|2|3|4]:CFIT:FREQuency[:AUTO]                                         | command/query | Specifies the region included in the curve fit operation
+CALC[1|2|3|4]:CFIT:FREQuency:STARt                                          | command/query | Specifies the start frequency for a curve fit operation over a
+CALC[1|2|3|4]:CFIT:FREQuency:STOP                                           | command/query | Specifies the stop frequency for a curve fit operation over a
+CALC[1|2|3|4]:CFIT:FSCale                                                   | command/query | Specifies the frequency scaling used in the curve fit operation
+CALC[1|2|3|4]:CFIT[:IMMediate]                                              | command only  | Starts the curve fit process
+CALC[1|2|3|4]:CFIT:ORDer:AUTO                                               | command/query | Determines the operation of the curve fitter
+CALC[1|2|3|4]:CFIT:ORDer:POLes                                              | command/query | Specifies the number of poles used in the curve fit operation
+CALC[1|2|3|4]:CFIT:ORDer:ZERos                                              | command/query | Specifies the number of zeros used in the curve fit operation
+CALC[1|2|3|4]:CFIT:TDELay                                                   | command/query | Specifies a time delay value for the curve fit operation
+CALC[1|2|3|4]:CFIT:WEIGht:AUTO                                              | command/query | Determines the weighting function used in the curve fit
+CALC[1|2|3|4]:CFIT:WEIGht:REGister                                          | command/query | Selects the data register which contains the weighting
+CALC[1|2|3|4]:DATA?                                                         | query only    | Returns trace data that has been transformed to the currently
+CALC[1|2|3|4]:DATA:HEADer:POINts?                                           | query only    | Returns the number of values in the data block returned with
+CALC[1|2|3|4]:FEED                                                          | command/query | Selects the measurement data to be displayed in the specified
+CALC[1|2|3|4]:FORMat                                                        | command/query | Selects a coordinate system for displaying measurement data
+CALC[1|2|3|4]:GDAPerture:APERture                                           | command/query | Specifies the phase-smoothing aperture used with group delay
+CALC[1|2|3|4]:LIMit:BEEP[:STATe]                                            | command/query | Turns the limit-fail beeper on and off
+CALC[1|2|3|4]:LIMit:FAIL?                                                   | query only    | Returns the result of the last limit test; 0 for pass or 1 for fail
+CALC[1|2|3|4]:LIM:LOW:CLEar[:IMMediate]                                     | command only  | Deletes the lower limit line from the specified display
+CALC[1|2|3|4]:LIMit:LOWer:MOVE:Y                                            | command only  | Moves all segments of the lower limit line up or down in the
+CALC[1|2|3|4]:LIMit:LOWer:REPort[:DATA]?                                    | query only    | Returns the X-axis value of the failed points for the lower
+CALC[1|2|3|4]:LIMit:LOWer:REPort:YDATa?                                     | query only    | Returns the Y-axis value of the failed points for the lower
+CALC[1|2|3|4]:LIMit:LOWer:SEGMent                                           | command/query | Defines the lower limit as a series of line segments in the
+CALC[1|2|3|4]:LIMit:LOWer:SEGMent:CLEar                                     | command only  | Deletes a segment from the lower limit line
+CALC[1|2|3|4]:LIM:LOW:TRACe[:IMMediate]                                     | command only  | Converts the specified trace into a lower limit line
+CALC[1|2|3|4]:LIMit:STATe                                                   | command/query | Turns limit testing on and off for the specified trace
+CALC[1|2|3|4]:LIM:UPPer:CLEar[:IMMediate]                                   | command only  | Deletes the upper limit line from the specified display
+CALC[1|2|3|4]:LIMit:UPPer:MOVE:Y                                            | command only  | Moves all segments of the upper limit line up or down in the
+CALC[1|2|3|4]:LIMit:UPPer:REPort[:DATA]?                                    | query only    | Returns the X-axis value of the failed points for the upper
+CALC[1|2|3|4]:LIMit:UPPer:REPort:YDATa?                                     | query only    | Returns the Y-axis value of the failed points for the upper
+CALC[1|2|3|4]:LIMit:UPPer:SEGMent                                           | command/query | Defines the upper limit as a series of line segments in the
+CALC[1|2|3|4]:LIMit:UPPer:SEGMent:CLEar                                     | command only  | Deletes a segment from the upper limit line
+CALC[1|2|3|4]:LIM:UPP:TRACe[:IMMediate]                                     | command only  | Converts the specified trace into an upper limit line
+CALC[1|2|3|4]:MARKer:BAND:STARt                                             | command/query | Specifies the lowest frequency of the band in which power is
+CALC[1|2|3|4]:MARKer:BAND:STOP                                              | command/query | Specifies the highest frequency of the band in which power is
+CALC[1|2|3|4]:MARKer:COUPled[:STATe]                                        | command/query | Couples the markers on all traces with the marker of the
+CALC[1|2|3|4]:MARK:DTABle:CLEar[:IMM]                                       | command only  | Clears all values in the specified data table
+CALC[1|2|3|4]:MARK:DTABl:COPY[1|2|3|4]                                      | command only  | Copies the data table from one trace to another trace
+CALC[1|2|3|4]:MARKer:DTABle[:DATA]?                                         | query only    | Returns the dependent values in the specified data table
+CALC[1|2|3|4]:MARKer:DTABle:X[:DATA]?                                       | query only    | Returns the X values in the specified data table
+CALC[1|2|3|4]:MARKer:DTABle:X:DELete                                        | command only  | Deletes the selected entry in the data table
+CALC[1|2|3|4]:MARKer:DTABle:X:INSert                                        | command/query | Inserts an entry into the data table
+CALC[1|2|3|4]:MARKer:DTABle:X:LABel                                         | command/query | Loads a label for the selected entry in the data table
+CALC[1|2|3|4]:MARK:DTABl:X:SELect[:POINt]                                   | command/query | Selects the data table entry
+CALC[1|2|3|4]:MARKer:FUNCtion                                               | command/query | Selects one of the analyzer’s marker functions
+CALC[1|2|3|4]:MARKer:FUNCtion:RESult?                                       | query only    | Returns the result of the calculation for the currently selected
+CALC[1|2|3|4]:MARKer:HARMonic:COUNt                                         | command/query | Specifies the maximum number of harmonic markers for the
+CALC[1|2|3|4]:MARK:HARM:FUNDamental                                         | command/query | Specifies the fundamental frequency for harmonic markers
+CALC[1|2|3|4]:MARKer:MAXimum[:GLOBal]                                       | command only  | Moves the main marker to the highest point on the specified
+CALC[1|2|3|4]:MARK:MAXi[:GLOBal]:TRACk                                      | command/query | Turns the peak tracking function on or off
+CALC[1|2|3|4]:MARKer:MAXimum:LEFT                                           | command only  | Moves the main marker one peak to the left of its current
+CALC[1|2|3|4]:MARKer:MAXimum:RIGHt                                          | command only  | Moves the main marker one peak to the right of its current
+CALC[1|2|3|4]:MARKer:MODE                                                   | command/query | Selects absolute or relative marker values
+CALC[1|2|3|4]:MARKer:POSition                                               | command/query | Specifies the main marker’s independent axis position
+CALC[1|2|3|4]:MARKer:POSition:POINt                                         | command/query | Moves the main marker to a specific display point
+CALC[1|2|3|4]:MARKer:REFerence:X                                            | command/query | Specifies the marker reference X-axis position
+CALC[1|2|3|4]:MARKer:REFerence:Y                                            | command/query | Specifies the marker reference Y-axis position
+CALC[1|2|3|4]:MARKer:SIDeband:CARRier                                       | command/query | Specifies the carrier frequency used for sideband markers and
+CALC[1|2|3|4]:MARKer:SIDeband:COUNt                                         | command/query | Specifies the number of sideband markers for the display
+CALC[1|2|3|4]:MARKer:SIDeband:INCRement                                     | command/query | Specifies the frequency increment (or delta) between
+CALC[1|2|3|4]:MARKer[:STATe]                                                | command/query | Turns on the main markers or turns off all markers and
+CALC[1|2|3|4]:MARKer:X[:ABSolute]                                           | command/query | Specifies the main marker’s X-axis position
+CALC[1|2|3|4]:MARKer:X:RELative                                             | command/query | Specifies the marker reference X-axis position relative to the
+CALC[1|2|3|4]:MARKer:Y[:ABSolute]?                                          | query only    | Returns the main marker’s Y-axis position
+CALC[1|2|3|4]:MARKer:Y:RELative                                             | command/query | Specifies the marker reference Y-axis position relative to the
+CALC[1|2|3|4]:MATH:CONStant[1|2|3|4|5]                                      | command/query | Defines the value of one of the constant registers
+CALC[1|2|3|4]:MATH:DATA                                                     | command/query | Loads a complete set of math definitions
+CALC[1|2|3|4]:MATH[:EXPR[1|2|3|4|5]]                                        | command/query | Defines a math function
+CALC[1|2|3|4]:MATH:SELect                                                   | command/query | Selects and displays the designated math function
+CALC[1|2|3|4]:MATH:STATe                                                    | command/query | Evaluates the currently selected math operation for the
+CALC[1|2|3|4]:SYNThesis:COPY                                                | command only  | Copies the contents of the curve fit table into the synthesis
+CALC[1|2|3|4]:SYNThesis:DATA                                                | command/query | Loads values into the synthesis table
+CALC[1|2|3|4]:SYNThesis:DESTination                                         | command/query | Selects the data register for the results of the synthesis
+CALC[1|2|3|4]:SYNThesis:FSCale                                              | command/query | Specifies a frequency scale for the synthesis operation
+CALC[1|2|3|4]:SYNThesis:GAIN                                                | command/query | Specifies the gain constant
+CALC[1|2|3|4]:SYNThesis[:IMMediate]                                         | command only  | Creates a frequency response curve from the synthesis table
+CALC[1|2|3|4]:SYNThesis:SPACing                                             | command/query | Specifies a linear or logarithmic scale for the X-axis data
+CALC[1|2|3|4]:SYNThesis:TDELay                                              | command/query | Specifies a time delay value for the synthesis operation
+CALC[1|2|3|4]:SYNThesis:TTYPe                                               | command/query | Converts the synthesis table to another table format
+CALC[1|2|3|4]:UNIT:AMPLitude                                                | command/query | Selects the unit of amplitude for the Y-axis scale
+CALC[1|2|3|4]:UNIT:ANGLe                                                    | command/query | Specifies the unit for phase coordinates
+CALC[1|2|3|4]:UNIT:DBReference                                              | command/query | Specifies the reference for dB magnitude trace coordinates
+CALC[1|2|3|4]:UNIT:DBReference:IM                                           | command/query | Specifies the system’s reference impedance value in ohms
+CALC[1|2|3|4]:UNIT:DBR:USER:LABel                                           | command/query | Assigns a name to the Y-axis unit when CALC:UNIT:DBR
+CALC[1|2|3|4]:UNIT:DBR:USER:REFerence                                       | command/query | Specifies the reference level for CALC:UNIT:DBR ‘USER’
+CALC[1|2|3|4]:UNIT:MECHanical                                               | command/query | Converts the Y-axis trace coordinates from the input’s
+CALC[1|2|3|4]:UNIT:VOLTage                                                  | command/query | Selects the vertical unit for the display’s Y-axis
+CALC[1|2|3|4]:UNIT:X                                                        | command/query | Specifies the X-axis unit
+CALC[1|2|3|4]:UNIT:X:ORDer:FACTor                                           | command/query | Specifies the speed of rotation in Hertz per Order or RPM per
+CALC[1|2|3|4]:UNIT:X:USER:FREQ:FACTor                                       | command/query | Specifies the frequency conversion factor for user-defined
+CALC[1|2|3|4]:UNIT:X:USER:FREQ:LABel                                        | command/query | Assigns a name to the user-defined X-axis units in the
+CALC[1|2|3|4]:UNIT:X:USER:TIME:FACTor                                       | command/query | Specifies the time conversion factor for user-defined X-axis
+CALC[1|2|3|4]:UNIT:X:USER:TIME:LABel                                        | command/query | Assigns a name to the user-defined X-axis units in the time
+CALC[1|2|3|4]:WATerfall:COUNt                                               | command/query | Specifies the number of traces stored for waterfall displays
+CALC[1|2|3|4]:WATerfall[:DATA]?                                             | query only    | Returns waterfall data that has been transformed to the
+CALC[1|2|3|4]:WATerfall:SLICe:COPY                                          | command only  | Copies the selected waterfall slice to the designated data
+CALC[1|2|3|4]:WATerfall:SLICe:SELect                                        | command/query | Selects the waterfall slice at the specified X-axis position
+CALC[1|2|3|4]:WATerfall:SLICe:SELect:POINt                                  | command/query | Selects a waterfall slice by its display point value
+CALC[1|2|3|4]:WATerfall:TRACe:COPY                                          | command only  | Saves the trace to the specified data register
+CALC[1|2|3|4]:WATerfall:TRACe:SELect                                        | command/query | Selects a waterfall trace by its Z-axis value
+CALC[1|2|3|4]:WAT:TRACe:SELect:POINt                                        | command/query | Selects a waterfall trace by its step value
+CALC[1|2|3|4]:X:DATA?                                                       | query only    | Returns X-axis values that correspond to the Y-axis values
+CALibration[:ALL]?                                                          | query only    | Calibrates the analyzer and returns the result
+CALibration:AUTO                                                            | command/query | Calibrates the analyzer or sets the state of the
+DISPlay:ANNotation[:ALL]                                                    | command/query | Turns the display of screen annotation on or off
+DISPlay:BODE                                                                | command only  | Displays a Bode diagram
+DISPlay:BRIGhtness                                                          | command/query | Adjusts the intensity of the display
+DISPlay:ERRor                                                               | command only  | Displays text in the same format as the analyzer
+DISPlay:EXTernal[:STATe]                                                    | command/query | Enables the use of an external monitor
+DISPlay:FORMat                                                              | command/query | Selects a format for displaying trace data
+DISPlay:GPIB:ECHO                                                           | command/query | Enables and disables the echoing of GPIB command
+DISPlay:PROGram:KEY:BOX                                                     | command/query | Draws a box around softkey in an Instrument BASIC program
+DISPlay:PROGram:KEY:BRACket                                                 | command/query | Draws a bracket around one or more softkeys in an
+DISPlay:PROGram[:MODE]                                                      | command/query | Selects the portion of the analyzer’s screen to be used for
+DISPlay:PROGram:VECTor:BUFFer[:STATe]                                       | command/query | Enables or disables the buffering of lines drawn with
+DISPlay:RPM[:STATe]                                                         | command/query | Turns on the display of the RPM indicator
+DISPlay:STATe                                                               | command/query | Turns on (or turns off) the analyzer’s display
+DISPlay:TCAPture:ENVelope[:STATe]                                           | command/query | Displays the envelope of the time
+DISPlay:VIEW                                                                | command/query | Specifies what is displayed on the analyzer’s screen
+DISP[:WIND[1|2|3|4]]:DTAB:MARKer[:STATe]                                    | command/query | Turns on or off the markers for data tables
+DISPlay[:WINDow[1|2|3|4]]:DTABle[:STATe]                                    | command/query | Enables and displays a data table
+DISPlay[:WINDow[1|2|3|4]]:LIMit:STATe                                       | command/query | Turns limit lines on or off in the specified display
+DISP[:WINDow[1|2|3|4]]:POLar:CLOCkwise                                      | command/query | Specifies the direction of the vector in a polar diagram
+DISPlay[:WINDow[1|2|3|4]]:POLar:ROTation                                    | command/query | Specifies the angle of rotation for the polar diagram
+DISP[:WIND[1|2|3|4]]:TRAC:APOWer[:STATe]                                    | command/query | Turns on or off the display of the A-weight total power band
+DISP[:WIND[1|2|3|4]]:TRAC:BPOW[:STATe]                                      | command/query | Turns on or off the display of the total power band
+DISP[:WIND[1|2|3|4]]:TRACe:GRATicule:GRID[:STATe]                           | command/query | Turns on or off the display’s overlay grid
+DISPlay[:WINDow[1|2|3|4]]:TRACe:LABel                                       | command/query | Loads a label for the specified trace
+DISP[:WIND[1|2|3|4]]:TRAC:LAB:DEF[:STAT]                                    | command/query | Turns on or off the analyzer’s default title for the specified
+3|4]                                                                        | command only  | Modifies the X-axis scaling of a trace to match the X-axis
+DISP[:WIND[1|2|3|4]]:TRAC:X[:SCAL]:AUTO                                     | command/query | Scales the measurement data to fit the trace box
+DISP[:WIND[1|2|3|4]]:TRAC:X[:SCALe]:LEFT                                    | command/query | Specifies the first X-axis value on the display
+DISP[:WIND[1|2|3|4]]:TRAC:X[:SCAL]:RIGHt                                    | command/query | Specifies the last X-axis value on the display
+DISP[:WINDow[1|2|3|4]]:TRACe:X:SPACing                                      | command/query | Specifies X-axis scaling
+3|4]                                                                        | command only  | Modifies the Y-axis scaling of a trace to match the Y-axis
+DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCALe]:AUTO                                    | command/query | Scales and repositions the trace vertically to provide the best
+DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCAL]:BOTT                                     | command/query | Specifies the value of the bottom reference point of the
+DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCAL]:CENT                                     | command/query | Specifies the value of the center reference point of the
+DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCAL]:PDIV                                     | command/query | Defines the height of each vertical division on the specified
+DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCAL]:REF                                      | command/query | Determines the Y-axis reference position for the specified
+DISP[:WIND[1|2|3|4]]:TRACe:Y[:SCALe]:TOP                                    | command/query | Specifies the value of the top reference point of the display’s
+DISP[:WINDow[1|2|3|4]]:TRACe:Y:SPACing                                      | command/query | Specifies scaling of the Y-axis for linear magnitude coordinate
+DISP[:WINDow[1|2|3|4]]:WATerfall:BASeline                                   | command/query | Specifies the percentage of each trace that is concealed in
+DISP[:WINDow[1|2|3|4]]:WATerfall:BOTTom                                     | command/query | Specifies the bottom Z-axis value in a waterfall display
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:COUNt                                   | command/query | Determines the number of traces displayed in the waterfall
+DISP[:WINDow[1|2|3|4]]:WATerfall:HEIGht                                     | command/query | Specifies the height of a waterfall trace box
+DISP[:WINDow[1|2|3|4]]:WATerfall:HIDDen                                     | command/query | Turns on or off the removal of hidden waterfall traces
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:SKEW                                    | command/query | Enables a skewed waterfall display
+DISP[:WIND[1|2|3|4]]:WATerfall:SKEW:ANGLe                                   | command/query | Specifies the amount of horizontal offset for waterfall
+DISP[:WINDow[1|2|3|4]]:WATerfall[:STATe]                                    | command/query | Turns on or off the waterfall display for the specified trace
+DISPlay[:WINDow[1|2|3|4]]:WATerfall:TOP                                     | command/query | Specifies the top Z-axis value in a waterfall display
+FORMat[:DATA]                                                               | command/query | Specifies the data type and date encoding to be used during
+HCOPy:COLor:DEFault                                                         | command only  | Specifies default values for the plotter pen assignments
+HCOPy:DESTination                                                           | command/query | Specifies where the print or plot operation is sent: either to a
+HCOPy:DEVice:LANGuage                                                       | command/query | Specifies the format of the plot/print output
+HCOPy:DEVice:SPEed                                                          | command/query | Specifies the plotting speed for all plotting operations
+HCOPy[:IMMediate]                                                           | command only  | Plots or prints the currently specified item
+HCOPy:ITEM:ALL[:IMMediate]                                                  | command only  | Plots or prints the entire screen
+HCOPy:ITEM:FFEed:STATe                                                      | command/query | Turns the page-eject feature on or off
+HCOPy:ITEM:LABel:COLor                                                      | command/query | Selects the pen used for plotting miscellaneous annotations
+HCOPy:ITEM:LABel:STATe                                                      | command/query | Prints a label on the plot and print output
+HCOPy:ITEM:LABel:TEXT                                                       | command/query | Specifies a label for plot and print output
+HCOPy:ITEM:TDSTamp:FORMat                                                   | command/query | Specifies the format of the time stamp used for plotting and
+HCOPy:ITEM:TDSTamp:STATe                                                    | command/query | Turns a time stamp on or off for print and plot operations
+HCOP:ITEM[:WINDow[1|2|3|4]]:TRACe:COLor                                     | command/query | Selects the pen used to plot the specified trace and
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:GRATicule:COLor                          | command/query | Selects the pen used to plot the trace graticules
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:GRATicule[:IMMediate]                    | command only  | Plots or prints all trace graticules
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe[:IMMediate]                              | command only  | Plots or prints the currently displayed trace(s)
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:LIMit:LTYPe                              | command/query | Selects the line type for the specified limit line
+HCOP:ITEM[:WIND[1|2|3|4]]:TRACe:LTYPe                                       | command/query | Selects the line type for the specified trace
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:MARKer:COLo                              | command/query | Selects the pen used to plot markers for the specified trace
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:MARKer[:IMMediate]                       | command only  | Plots or prints the all currently displayed markers
+HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:MARKer:REFerence[:IMMediate]             | command only  | Plots or prints the marker reference for the currently
+HCOPy:PAGE:DIMensions:AUTO                                                  | command/query | Specifies P1 and P2 values for a plotter
+HCOPy:PAGE:DIMensions:USER:LLEFt                                            | command/query | Specifies the lower left position (P1) of the plot area
+HCOPy:PAGE:DIMensions:USER:URIGht                                           | command/query | Specifies the upper right position (P2) of the plot area
+HCOPy:PLOT:ADDRess                                                          | command/query | Tells the analyzer which GPIB address is assigned to your
+HCOPy:PRINt:ADDRess                                                         | command/query | Tells the analyzer which GPIB address is assigned to your
+HCOPy:TITLe[1|2]                                                            | command/query | Specifies a label for plot and print output
+INITiate:CONTinuous                                                         | command/query | Sets the trigger system to a continuously initiated state
+INITiate[:IMMediate]                                                        | command only  | Starts a measurement and forces the trigger system to exit
+INPut[1|2|3|4]:BIAS[:STATe]                                                 | command/query | Enables/disables the ICP supply on the corresponding input
+INPut[1|2|3|4]:COUPling                                                     | command/query | Selects AC or DC coupling for the specified channel
+INPut[1|2|3|4]:FILTer:AWEighting[:STATe]                                    | command/query | Enables/disables the A-weight filter on the specified input
+INPut[1|2|3|4]:FILTer[:LPASs][:STATe]                                       | command/query | Enables/disables the anti-alias filter for the specified input
+INPut[1|2|3|4]:LOW                                                          | command/query | Sets the specified channel’s input shield to float or to ground
+INPut[1|2|3|4]:REFerence:DIRection                                          | command/query | Sets the direction for the transducer point
+INPut[1|2|3|4]:REFerence:POINt                                              | command/query | Sets the number for the transducer point
+INPut[1|2|3|4][:STATe]                                                      | command/query | Specifies one-channel
+INSTrument:NSELect                                                          | command/query | Selects one of the analyzer’s six major instrument modes
+INSTrument[:SELect]                                                         | command/query | Selects one of the analyzer’s six major instrument modes
+MEMory:CATalog[:ALL]?                                                       | query only    | Returns information on the current contents and state of the
+MEMory:CATalog:NAME?                                                        | query only    | Returns information about memory usage allocated for a
+MEMory:DELete:ALL                                                           | command only  | Purges all allocated memory in the analyzer
+MEMory:DELete[:NAME]                                                        | command only  | Purges the memory allocated for a specific item
+MEMory:FREE[:ALL]?                                                          | query only    | Returns information on the state of the analyzer’s memory
+MMEMory:COPY                                                                | command only  | Copies the contents of one disk to another or one file to
+MMEMory:DELete                                                              | command only  | Deletes one file or the contents of an entire disk
+MMEMory:DISK:ADDRess                                                        | command/query | Tells the analyzer which GPIB address is assigned to your
+MMEMory:DISK:UNIT                                                           | command/query | Specifies the unit of the external disk drive
+MMEMory:FSYStem?                                                            | query only    | Returns the type of file system for the default disk
+MMEMory:INITialize                                                          | command only  | Formats the specified disk
+MMEMory:LOAD:CFIT                                                           | command only  | Loads a curve fit table into the analyzer from a file on the
+MMEMory:LOAD:CONTinue                                                       | command/query | Continues the load operation of time capture and waterfall
+MMEMory:LOAD:DTABle:TRACe[1|2|3|4]                                          | command only  | Loads a data table into the analyzer from a file on the
+MMEMory:LOAD:LIMit:LOWer:TRACe[1|2|3|4]                                     | command only  | Loads a lower limit for the specified trace from a file on the
+MMEMory:LOAD:LIMit:UPPer:TRACe[1|2|3|4]                                     | command only  | Loads an upper limit for the specified trace from a file on the
+MMEMory:LOAD:MATH                                                           | command only  | Loads a complete set of math definitions into the analyzer
+MMEMory:LOAD:PROGram                                                        | command only  | Loads an Instrument BASIC program into the analyzer from a
+MMEMory:LOAD:STATe                                                          | command only  | Loads an instrument state into the analyzer from the specified
+MMEMory:LOAD:SYNThesis                                                      | command only  | Loads a synthesis table into the analyzer from a file on the
+MMEMory:LOAD:TCAPture                                                       | command only  | Loads a time capture file from the specified disk
+MMEMory:LOAD:TRACe                                                          | command only  | Loads a trace into the analyzer from the specified disk
+MMEMory:LOAD:WATerfall                                                      | command only  | Loads a waterfall file into the analyzer from a file on the
+MMEMory:MDIRectory                                                          | command only  | @RSUB1 = Command Syntax:
+MMEMory:MOVE                                                                | command only  | Renames a file
+MMEMory:MSIS                                                                | command/query | Specifies a default disk
+MMEMory:NAME                                                                | command/query | Specifies a filename for the output of a print or plot operation
+MMEMory:STORe:CFIT                                                          | command only  | Stores a curve fit table to a file on the specified disk
+MMEMory:STORe:CONTinue                                                      | command/query | Splits a large file (a time capture file or a waterfall file) over
+MMEMory:STORe:DTABle:TRACe[1|2|3|4]                                         | command only  | Saves the specified data table to a file on the specified disk
+MMEM:STORe:LIMit:LOWer:TRACe[1|2|3|4]                                       | command only  | Saves the lower limit of the specified trace to a file on the
+MMEM:STORe:LIMit:UPPer:TRACe[1|2|3|4]                                       | command only  | Saves the upper limit of the specified trace to a file on the
+MMEMory:STORe:MATH                                                          | command only  | Saves a complete set of math definitions to a file on the
+MMEMory:STORe:PROGram                                                       | command only  | Saves an Instrument BASIC program to a file on the specified
+MMEMory:STORe:PROGram:FORMat                                                | command/query | Specifies the format Agilent Instrument BASIC programs are
+MMEMory:STORe:STATe                                                         | command only  | Saves the instrument state to a file on the specified disk
+MMEMory:STORe:SYNThesis                                                     | command only  | Stores a synthesis table to a file on the specified disk
+MMEMory:STORe:TCAPture                                                      | command only  | Saves the time capture buffer to a file on the specified disk
+MMEMory:STORe:TRACe                                                         | command only  | Saves the specified trace to a file on the specified disk
+MMEMory:STORe:WATerfall                                                     | command only  | Saves the current waterfall display to a file on the specified
+OUTPut:FILTer[:LPASs][:STATe]                                               | command/query | Turns on a low pass filter for the arbitrary source
+OUTPut[:STATe]                                                              | command/query | Enables the analyzer’s internal source
+PROGram:EDIT:ENABle                                                         | command/query | Disables the Agilent Instrument BASIC editor
+PROGram:EXPLicit:DEFine                                                     | command/query | Loads an Agilent Instrument BASIC program into the specified
+PROGram:EXPLicit:LABel                                                      | command/query | Loads a softkey label for the specified
+PROGram[:SELected]:DEFine                                                   | command/query | Loads an HP Instrument BASIC program from an external
+PROGram[:SELected]:DELete:ALL                                               | command only  | Deletes all HP Instrument BASIC programs stored in the
+PROGram[:SELected]:DELete[:SELected]                                        | command only  | Deletes the active HP Instrument BASIC program
+PROGram[:SELected]:LABel                                                    | command/query | Loads a softkey label for the active HP Instrument BASIC
+PROGram[:SELected]:MALLocate                                                | command/query | Allocates memory space for HP Instrument BASIC programs
+PROGram[:SELected]:NAME                                                     | command/query | Selects an HP Instrument BASIC program
+PROGram[:SELected]:NUMBer                                                   | command/query | Loads a new value for the specified numeric variable in the
+PROGram[:SELected]:STATe                                                    | command/query | Selects the state of the active HP Instrument BASIC program
+PROGram[:SELected]:STRing                                                   | command/query | Loads a new value for the specified string variable for the
+[SENSe:]AVERage:CONFidence                                                  | command/query | Specifies the confidence level used in equal confidence
+[SENSe:]AVERage:COUNt                                                       | command/query | Specifies a count or a weighting factor for the averaged
+[SENSe:]AVERage:HOLD                                                        | command/query | Specifies the type of hold used in averaging octave
+[SENSe:]AVERage:IMPulse                                                     | command/query | Enables impulse detection in octave measurements
+[SENSe:]AVERage:IRESult:RATE                                                | command/query | Specifies how often the display is updated when fast average
+[SENSe:]AVERage:IRESult[:STATe]                                             | command/query | Selects fast average mode
+[SENSe:]AVERage:PREView                                                     | command/query | Specifies the type of preview averaging
+[SENSe:]AVERage:PREView:ACCept                                              | command only  | Accept the current time record during preview averaging
+[SENSe:]AVERage:PREView:REJect                                              | command only  | Reject the current time record during preview averaging
+[SENSe:]AVERage:PREView:TIME                                                | command/query | Specifies the amount of time the analyzer waits for a
+[SENSe:]AVERage[:STATe]                                                     | command/query | Turns the selected averaging function (AVER:TYPE) on or off
+[SENSe:]AVERage:TCONtrol                                                    | command/query | Specifies how the analyzer behaves after the count
+[SENSe:]AVERage:TIME                                                        | command/query | Specify the time period used in averaging octave
+[SENSe:]AVERage:TYPE                                                        | command/query | Specifies the type of averaging the analyzer performs
+[SENSe:]FEED                                                                | command/query | Specifies the data source for a measurement; either from the
+[SENSe:]FREQuency:BLOCksize                                                 | command/query | Specifies the number of real-time data points displayed on the
+[SENSe:]FREQuency:CENTer                                                    | command/query | Specifies the center frequency for the current measurement
+[SENSe:]FREQuency:MANual                                                    | command/query | Selects a discrete point to be measured during manual sweep
+[SENSe:]FREQuency:RESolution                                                | command/query | Specifies the frequency measurement resolution for FFT and
+[SENSe:]FREQuency:RESolution:AUTO                                           | command/query | Selects auto resolution for swept sine instrument mode
+[SENS:]FREQuency:RESolution:AUTO:MCHange                                    | command/query | Specifies the maximum change permitted between the
+[SENSe:]FREQuency:RESolution:AUTO:MINimum                                   | command/query | Specifies the initial resolution of a swept sine measurement
+[SENSe:]FREQuency:RESolution:OCTave                                         | command/query | Specifies the type of octave measurement
+[SENSe:]FREQuency:SPAN                                                      | command/query | Specifies the frequency bandwidth to be measured
+[SENSe:]FREQuency:SPAN:FULL                                                 | command only  | Sets the analyzer to the widest frequency span available for
+[SENSe:]FREQuency:SPAN:LINK                                                 | command/query | Specifies the frequency parameter which remains constant if
+[SENSe:]FREQuency:STARt                                                     | command/query | Specifies the start (lowest) frequency for the frequency band
+[SENSe:]FREQuency:STEP[:INCRement]                                          | command/query | Specifies the step size which is used when changing
+[SENSe:]FREQuency:STOP                                                      | command/query | Sets the stop frequency to the specified value
+[SENSe:]HISTogram:BINS                                                      | command/query | Specifies the number of bins in a histogram
+[SENSe:]ORDer:MAXimum                                                       | command/query | Specifies the number of orders to be displayed
+[SENSe:]ORDer:RESolution                                                    | command/query | Specifies order resolution
+[SENSe:]ORDer:RESolution:TRACk                                              | command/query | Specifies the number of points per order track
+[SENSe:]ORDer:RPM:MAXimum                                                   | command/query | Specifies the maximum rotational speed range you want to
+[SENSe:]ORDer:RPM:MINimum                                                   | command/query | Specifies the minimum rotational speed range you want to
+[SENSe:]ORDer:TRACk[1|2|3|4|5]                                              | command/query | Specify the order number for the selected track
+[SENSe:]ORDer:TRACk[1|2|3|4|5]:STATe                                        | command/query | Selects order track or order spectrum measurements
+[SENSe:]REFerence                                                           | command/query | Specifies the reference channel(s)
+[SENSe:]REJect:STATe                                                        | command/query | Turns overload rejection on or off
+[SENSe:]SWEep:DIRection                                                     | command/query | Specifies the direction of the sweep
+[SENSe:]SWEep:DWELl                                                         | command/query | Specifies the integration time for swept sine measurements
+[SENSe:]SWEep:MODE                                                          | command/query | Specifies automatic or manual sweep modes
+[SENSe:]SWEep:OVERlap                                                       | command/query | Specifies the maximum amount of time record overlap
+[SENSe:]SWEep:SPACing                                                       | command/query | Selects linear or logarithmic spacing between measurement
+[SENSe:]SWEep:STIMe                                                         | command/query | Specifies the settling time for a swept sine measurement
+[SENSe:]SWEep:TIME                                                          | command/query | Specifies the length of the time record in seconds
+[SENSe:]TCAPture:ABORt                                                      | command only  | Stops the time capture process
+[SENSe:]TCAPture:DELete                                                     | command only  | Removes the time capture buffer
+[SENSe:]TCAPture[:IMMediate]                                                | command only  | Starts the collection of data for the time capture process
+[SENSe:]TCAPture:LENGth                                                     | command/query | Specifies the length of the time capture buffer
+[SENSe:]TCAPture:MALLocate                                                  | command only  | Allocates memory for the time capture buffer
+[SENSe:]TCAPture:STARt[1|2|3|4]                                             | command/query | Specifies the beginning of the time capture data used in a
+[SENSe:]TCAPture:STOP[1|2|3|4]                                              | command/query | Specifies the end of the time capture data used in a
+[SENSe:]TCAPture:TACHometer:RPM:MAXimum                                     | command/query | Specifies the tachometer’s maximum RPM when included in
+[SENSe:]TCAPture:TACHometer[:STATe]                                         | command/query | Directs the analyzer to include the tachometer input signal in
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:AUTO                                    | command/query | Automatically selects the best range on the specified channel
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:AUTO:DIRectio                           | command/query | Selects the type of autorange; up/down or up only
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:USER:LA                            | command/query | Assigns a name to the transducer units for the specified input
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:USER:SF                            | command/query | Specifies the transducer sensitivity for transducer units
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:USER[:ST                           | command/query | Enables the use of transducer units
+[SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:XDCR:LA                            | command/query | Specifies a transducer unit for the specified channel
+[SENS:]VOLT[1|2|3|4][:DC]:RANGe[:UPPer]                                     | command/query | Specifies the input range for the selected channel
+[SENSe:]WINDow[1|2|3|4]:EXPonential                                         | command/query | Specifies the time constant for the exponential window
+[SENSe:]WINDow[1|2|3|4]:FORCe                                               | command/query | Specifies the width of the force window
+[SENSe:]WINDow[1|2|3|4]:ORDer:DC                                            | command/query | Directs the analyzer to include the DC bin in the composite
+[SENSe:]WINDow[1|2|3|4][:TYPE]                                              | command/query | Selects the type of windowing function
+SOURce:BURSt                                                                | command/query | Sets the burst length for the burst source types
+SOURce:FREQuency[:CW]                                                       | command/query | Sets the frequency of the sine source
+SOURce:FREQuency:FIXed                                                      | command/query | Sets the frequency of the sine source type
+SOURce:FUNCtion[:SHAPe]                                                     | command/query | Specifies the source output
+SOURce:USER:CAPTure                                                         | command/query | Specifies which channel of time capture data to use
+SOURce:USER[:REGister]                                                      | command/query | Specifies the data register which contains the data for the
+SOURce:USER:REPeat                                                          | command/query | Enables the source repeat function
+SOURce:VOLTage[:LEVel]:AUTO                                                 | command/query | Enables the autolevel feature in swept sine measurements
+SOURce:VOLTage[:LEVel][:IMMediate][:AMPLitude]                              | command/query | Specifies the source output level
+SOURce:VOLTage[:LEVel][:IMMediate]:OFFSet                                   | command/query | Specifies a DC offset for the source output
+SOURce:VOLTage[:LEVel]:REFerence                                            | command/query | Specifies the amplitude of the reference input channel for the
+SOURce:VOLTage[:LEVel]:REFerence:CHANnel                                    | command/query | Selects the reference input channel for the autolevel feature
+SOURce:VOLTage[:LEVel]:REFerence:TOLerance                                  | command/query | Specifies the sensitivity of the autolevel algorithm in swept
+SOURce:VOLTage:LIMit[:AMPLitude]                                            | command/query | Sets the maximum limit used by the autolevel algorithm to
+SOURce:VOLTage:LIMit:INPut                                                  | command/query | Sets the maximum amplitude of the non-reference
+SOURce:VOLTage:SLEW                                                         | command/query | Specifies the source amplitude ramp rate in swept sine
+STATus:DEVice:CONDition?                                                    | query only    | Reads and clears the Device State condition register
+STATus:DEVice:ENABle                                                        | command/query | Sets and queries bits in the Device State enable register
+STATus:DEVice[:EVENt]?                                                      | query only    | Reads and clears the Device State event register
+STATus:DEVice:NTRansition                                                   | command/query | Sets and queries bits in the Device Status negative transition
+STATus:DEVice:PTRansition                                                   | command/query | Sets and queries bits in the Device State positive transition
+STATus:OPERation:CONDition?                                                 | query only    | Reads the Operation Status condition register
+STATus:OPERation:ENABle                                                     | command/query | Sets and queries bits in the Operation Status enable register
+STATus:OPERation[:EVENt]?                                                   | query only    | Reads and clears the Operation Status event register
+STATus:OPERation:NTRansition                                                | command/query | Sets and queries bits in the Operation Status negative
+STATus:OPERation:PTRansition                                                | command/query | Sets bits in the Operation Status positive transition register
+STATus:PRESet                                                               | command only  | Sets bits in most enable and transition registers to their
+STATus:QUEStionable:CONDition?                                              | query only    | Reads and clears the Questionable Status condition register
+STATus:QUEStionable:ENABle                                                  | command/query | Sets and queries bits in the Questionable Status enable
+STATus:QUEStionable[:EVENt]?                                                | query only    | Reads and clears the Questionable Status event register
+STATus:QUEStionable:LIMit:CONDition?                                        | query only    | Reads and clears the Limit Fail condition register
+STATus:QUEStionable:LIMit:ENABle                                            | command/query | Sets and queries bits in the Limit Fail enable register
+STATus:QUEStionable:LIMit[:EVENt]?                                          | query only    | Reads and clears the Limit Fail event register
+STATus:QUEStionable:LIMit:NTRansition                                       | command/query | Sets and queries bits in the Limit Fail negative transition
+STATus:QUEStionable:LIMit:PTRansition                                       | command/query | Sets queries bits in the Limit Fail positive transition register
+STATus:QUEStionable:NTRansition                                             | command/query | Sets and queries bits in the Questionable Status negative
+STATus:QUEStionable:PTRansition                                             | command/query | Sets and queries bits in the Questionable Status positive
+STATus:QUEStionable:VOLTage:CONDition?                                      | query only    | Reads the Questionable Voltage condition register
+STATus:QUEStionable:VOLTage:ENABle                                          | command/query | Sets and queries bits in the Questionable Voltage enable
+STATus:QUEStionable:VOLTage[:EVENt]?                                        | query only    | Reads and clears the Questionable Voltage event register
+STATus:QUEStionable:VOLTage:NTRansition                                     | command/query | Sets and queries bits in the Questionable Voltage negative
+STATus:QUEStionable:VOLTage:PTRansition                                     | command/query | Sets bits in the Questionable Voltage positive transition
+STATus:USER:ENABle                                                          | command/query | Sets and queries bits in the User Defined enable register
+STATus:USER[:EVENt]?                                                        | query only    | Reads and clears the User Defined event register
+STATus:USER:PULSe                                                           | command only  | Sets bits in the User Defined event register
+SYSTem:BEEPer[:IMMediate]                                                   | command only  | Generates the tone at a given frequency from the analyzer’s
+SYSTem:BEEPer:STATe                                                         | command/query | Enables the analyzer’s beeper
+SYSTem:COMMunicate:GPIB[:SELF]:ADDRess                                      | command/query | Sets the analyzer’s GPIB address
+SYSTem:COMMunicate:SERial[:RECeive]:BAUD                                    | command/query | Specifies the data-transfer rate between the analyzer and
+SYSTem:COMMunicate:SERial[:RECeive]:BITS                                    | command/query | Specifies the number of bits in a character for the RS-232-C
+SYSTem:COMMunicate:SERial[:RECeive]:PACE                                    | command/query | Sets the RS-232-C receiver handshake pacing type
+SYSTem:COMMunicate:SERial[:RECeive]:PARity:CHECk                            | command/query | Enables RS-232-C parity verification capability
+SYSTem:COMMunicate:SERial[:RECeive]:PARity[:TYPE]                           | command/query | Sets the parity generated for characters transmitted over the
+SYSTem:COMMunicate:SERial[:RECeive]:SBITs                                   | command/query | Specifies the number of “stop bits” sent with each character
+SYSTem:COMMunicate:SERial:TRANsmit:PACE                                     | command/query | Sets the RS-232 transmitter handshake pacing type
+SYSTem:DATE                                                                 | command/query | Sets the date in the analyzer’s battery-backed clock
+SYSTem:ERRor?                                                               | query only    | Returns one error message from the analyzer’s error queue
+SYSTem:FAN[:STATe]                                                          | command/query | Sets the fan’s operating mode
+SYSTem:FLOG:CLEar                                                           | command only  | Clears the fault log of all entries
+SYSTem:KEY                                                                  | command/query | Writes or queries front-panel key presses
+SYSTem:KLOCk                                                                | command/query | Disables the keyboard
+SYSTem:POWer:SOURce?                                                        | query only    | Queries the setting of the rear-panel power select switch
+SYSTem:POWer:STATe                                                          | command/query | Turns off the analyzer’s power
+SYSTem:PRESet                                                               | command only  | Returns most of the analyzer’s parameters to their preset
+SYSTem:SET                                                                  | command/query | Transfers an instrument state between the analyzer and an
+SYSTem:TIME                                                                 | command/query | Sets the time in the analyzer’s battery-backed clock
+SYSTem:VERSion?                                                             | query only    | Returns the SCPI version to which the analyzer complies
+TEST:LOG:CLEar                                                              | command only  | Clears the test log
+TEST:LONG                                                                   | command only  | Executes the long confidence test
+TEST:LONG:RESult?                                                           | query only    | Returns the overall result of the long confidence test
+TRACe[:DATA]                                                                | command/query | Stores data to the specified data register
+TRACe:WATerfall[:DATA]                                                      | command/query | Stores data to the specified waterfall register
+TRACe:X[:DATA]?                                                             | query only    | Returns the X-axis data for trace displays
+TRACe:X:UNIT?                                                               | query only    | Returns the unit for the x-axis for trace displays
+TRACe:Z[:DATA]?                                                             | query only    | Returns the Z-axis data for waterfall displays
+TRACe:Z:UNIT?                                                               | query only    | Returns the unit for the z-axis in waterfall displays
+TRIGger:EXTernal:FILTer[:LPAS][:STATe]                                      | command/query | Turns on a low pass filter for the external trigger
+TRIGger:EXTernal:LEVel                                                      | command/query | Specifies the level of the external input signal which causes
+TRIGger:EXTernal:RANGe                                                      | command/query | Selects the range for the external trigger’s level
+TRIGger[:IMMediate]                                                         | command only  | Triggers the analyzer if TRIG:SOUR is BUS
+TRIGger:LEVel                                                               | command/query | Specifies the level of the input signal which causes the
+TRIGger:SLOPe                                                               | command/query | Specifies the slope of the signal which triggers the analyzer
+TRIGger:SOURce                                                              | command/query | Selects the source of the trigger event
+TRIGger:STARt[1|2|3|4]                                                      | command/query | Specifies a pre-trigger or a post-trigger delay for the specified
+TRIGger:TACHometer:HOLDoff                                                  | command/query | Specifies a time interval in which the tachometer trigger is
+TRIGger:TACHometer:LEVel                                                    | command/query | Specifies the level of the tachometer’s input signal which
+TRIGger:TACHometer:PCOunt                                                   | command/query | Specifies the number of tachometer pulses that occur in one
+TRIGger:TACHometer:RANGe                                                    | command/query | Specifies the input range of the analyzer’s tachometer
+TRIGger:TACHometer[:RPM]?                                                   | query only    | Reads and returns the current RPM value for the analyzer’s
+TRIGger:TACHometer:SLOPe                                                    | command/query | Specifies the slope of the tachometer input signal to be used
+
+
+# SECTION 3 — RAW APPENDIX A TEXT EXTRACT FOR CROSS-CHECKING
+                                 A
+
+Agilent 35670A Command Summary
+
+
+
+
+                                                                                                                                      A
+
+Agilent 35670A Command Summary
+
+Introduction
+
+This appendix contains of all the GPIB commands recognized by the Agilent 35670A and a brief
+description. All commands have a query form unless specified as command only or query only.
+
+The appendix lists common commands and then lists the subsystem commands in alphabetical order.
+
+
+
+
+Command List
+
+
+    Command
+                           Form                                                         Description
+    Commands
+  *CAL?                  query only          Calibrates the analyzer and returns the result
+  *CLS                 command only          Clears the Status Byte by emptying the error queue and clearing all event registers
+  *ESE                       ‡               Sets bits in the Standard Event enable register
+  *ESR?                  query only          Reads and clears the Standard Event event register
+  *IDN?                  query only          Returns a string that uniquely identifies the analyzer
+  *OPC                       ‡               Sets or queries completion of all pending overlapped commands
+  *OPT?                  query only          Returns a string that identifies the analyzer’s option configuration
+  *PCB                 command only          Sets the pass-control-back address
+  *PSC                       ‡               Sets the state of the Power-on Status Clear flag
+  *RST                 command only          Executes a device reset
+  *SRE                       ‡               Sets bits in the Service Request enable register
+  *STB?                  query only          Reads the Status Byte register
+  *TRG                 command only          Triggers the analyzer when TRIG:SOUR is BUS
+  *TST?                  query only          Tests the analyzer hardware and returns the results
+  *WAI                 command only          Holds off processing of subsequent commands until all preceding commands have been processed
+  ‡ Command form; add ``?’’ for query form
+
+
+
+
+                                                                                                                                     A-1
+
+
+Agilent 35670A Command Summary
+
+
+               Subsystem Commands              Form                               Description
+  ABORt                                    command only   Stops the current measurement in progress
+
+  ARM
+  ARM[:IMMediate]                          command only   Arms the trigger if ARM:SOUR is MAN
+  ARM:RPM:INCRement                              ‡        Specifies the number of RPM in a step for RPM step arming
+  ARM:RPM:MODE                                   ‡        Enables the Start RPM Arming qualifier
+  ARM:RPM:THReshold                              ‡        Specifies the starting RPM value
+  ARM:SOURce                                     ‡        Specifies the type of arming for the analyzer’s trigger
+  ARM:TIMer                                      ‡        Specifies the size of the step used in time step arming
+
+  CALCulate
+  CALCulate[1|2|3|4]:ACTive                      ‡        Selects the active trace(s)
+  CALC[1|2|3|4]:CFIT:ABORt                 command only   Aborts the curve fit operation
+  CALC[1|2|3|4]:CFIT:COPY                  command only   Copies the synthesis table into the curve-fit table
+  CALC[1|2|3|4]:CFIT:DATA                        ‡        Loads values into the curve fit table
+  CALC[1|2|3|4]:CFIT:DESTination                 ‡        Selects the data register for the results of the curve fit
+                                                          operation
+  CALC[1|2|3|4]:CFIT:FREQuency[:AUTO]            ‡        Specifies the region included in the curve fit operation
+  CALC[1|2|3|4]:CFIT:FREQuency:STARt             ‡        Specifies the start frequency for a curve fit operation over a
+                                                          limited frequency span
+  CALC[1|2|3|4]:CFIT:FREQuency:STOP              ‡        Specifies the stop frequency for a curve fit operation over a
+                                                          limited frequency span
+  CALC[1|2|3|4]:CFIT:FSCale                      ‡        Specifies the frequency scaling used in the curve fit operation
+  CALC[1|2|3|4]:CFIT[:IMMediate]           command only   Starts the curve fit process
+  CALC[1|2|3|4]:CFIT:ORDer:AUTO                  ‡        Determines the operation of the curve fitter
+  CALC[1|2|3|4]:CFIT:ORDer:POLes                 ‡        Specifies the number of poles used in the curve fit operation
+  CALC[1|2|3|4]:CFIT:ORDer:ZERos                 ‡        Specifies the number of zeros used in the curve fit operation
+  CALC[1|2|3|4]:CFIT:TDELay                      ‡        Specifies a time delay value for the curve fit operation
+  CALC[1|2|3|4]:CFIT:WEIGht:AUTO                 ‡        Determines the weighting function used in the curve fit
+                                                          operation
+  CALC[1|2|3|4]:CFIT:WEIGht:REGister             ‡        Selects the data register which contains the weighting
+                                                          function for the curve fit operation
+  CALC[1|2|3|4]:DATA?                        query only   Returns trace data that has been transformed to the currently
+                                                          selected coordinate transform (specified with the
+                                                          CALC:FORMat command)
+  CALC[1|2|3|4]:DATA:HEADer:POINts?          query only   Returns the number of values in the data block returned with
+                                                          the CALC:DATA? query
+  CALC[1|2|3|4]:FEED                             ‡        Selects the measurement data to be displayed in the specified
+                                                          trace
+
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+A-2
+
+
+                                                                                    Agilent 35670A Command Summary
+
+
+              Subsystem Commands                Form                                 Description
+ CALC[1|2|3|4]:FORMat                             ‡         Selects a coordinate system for displaying measurement data
+                                                            and for transferring coordinate transformed data to a
+                                                            controller
+ CALC[1|2|3|4]:GDAPerture:APERture                ‡         Specifies the phase-smoothing aperture used with group delay
+                                                            trace coordinates
+ CALC[1|2|3|4]:LIMit:BEEP[:STATe]                 ‡         Turns the limit-fail beeper on and off
+ CALC[1|2|3|4]:LIMit:FAIL?                    query only    Returns the result of the last limit test; 0 for pass or 1 for fail
+ CALC[1|2|3|4]:LIM:LOW:CLEar[:IMMediate]     command only   Deletes the lower limit line from the specified display
+ CALC[1|2|3|4]:LIMit:LOWer:MOVE:Y            command only   Moves all segments of the lower limit line up or down in the
+                                                            specified trace
+ CALC[1|2|3|4]:LIMit:LOWer:REPort[:DATA]?     query only    Returns the X-axis value of the failed points for the lower
+                                                            limit test
+ CALC[1|2|3|4]:LIMit:LOWer:REPort:YDATa?      query only    Returns the Y-axis value of the failed points for the lower
+                                                            limit test
+ CALC[1|2|3|4]:LIMit:LOWer:SEGMent                ‡         Defines the lower limit as a series of line segments in the
+                                                            specified display
+ CALC[1|2|3|4]:LIMit:LOWer:SEGMent:CLEar     command only   Deletes a segment from the lower limit line
+ CALC[1|2|3|4]:LIM:LOW:TRACe[:IMMediate]     command only   Converts the specified trace into a lower limit line
+ CALC[1|2|3|4]:LIMit:STATe                        ‡         Turns limit testing on and off for the specified trace
+ CALC[1|2|3|4]:LIM:UPPer:CLEar[:IMMediate]   command only   Deletes the upper limit line from the specified display
+ CALC[1|2|3|4]:LIMit:UPPer:MOVE:Y            command only   Moves all segments of the upper limit line up or down in the
+                                                            specified trace box
+ CALC[1|2|3|4]:LIMit:UPPer:REPort[:DATA]?     query only    Returns the X-axis value of the failed points for the upper
+                                                            limit test
+ CALC[1|2|3|4]:LIMit:UPPer:REPort:YDATa?      query only    Returns the Y-axis value of the failed points for the upper
+                                                            limit test
+ CALC[1|2|3|4]:LIMit:UPPer:SEGMent                ‡         Defines the upper limit as a series of line segments in the
+                                                            specified display
+ CALC[1|2|3|4]:LIMit:UPPer:SEGMent:CLEar     command only   Deletes a segment from the upper limit line
+ CALC[1|2|3|4]:LIM:UPP:TRACe[:IMMediate]     command only   Converts the specified trace into an upper limit line
+ CALC[1|2|3|4]:MARKer:BAND:STARt                  ‡         Specifies the lowest frequency of the band in which power is
+                                                            calculated
+ CALC[1|2|3|4]:MARKer:BAND:STOP                   ‡         Specifies the highest frequency of the band in which power is
+                                                            calculated
+ CALC[1|2|3|4]:MARKer:COUPled[:STATe]             ‡         Couples the markers on all traces with the marker of the
+                                                            primary active trace
+ CALC[1|2|3|4]:MARK:DTABle:CLEar[:IMM]       command only   Clears all values in the specified data table
+ CALC[1|2|3|4]:MARK:DTABl:COPY[1|2|3|4]      command only   Copies the data table from one trace to another trace
+ CALC[1|2|3|4]:MARKer:DTABle[:DATA]?          query only    Returns the dependent values in the specified data table
+
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+                                                                                                                          A-3
+
+
+Agilent 35670A Command Summary
+
+
+               Subsystem Commands                Form                                Description
+  CALC[1|2|3|4]:MARKer:DTABle:X[:DATA]?        query only    Returns the X values in the specified data table
+  CALC[1|2|3|4]:MARKer:DTABle:X:DELete        command only   Deletes the selected entry in the data table
+  CALC[1|2|3|4]:MARKer:DTABle:X:INSert             ‡         Inserts an entry into the data table
+  CALC[1|2|3|4]:MARKer:DTABle:X:LABel              ‡         Loads a label for the selected entry in the data table
+  CALC[1|2|3|4]:MARK:DTABl:X:SELect[:POINt]        ‡         Selects the data table entry
+  CALC[1|2|3|4]:MARKer:FUNCtion                    ‡         Selects one of the analyzer’s marker functions
+  CALC[1|2|3|4]:MARKer:FUNCtion:RESult?        query only    Returns the result of the calculation for the currently selected
+                                                             marker function
+  CALC[1|2|3|4]:MARKer:HARMonic:COUNt              ‡         Specifies the maximum number of harmonic markers for the
+                                                             display
+  CALC[1|2|3|4]:MARK:HARM:FUNDamental              ‡         Specifies the fundamental frequency for harmonic markers
+                                                             and calculations
+  CALC[1|2|3|4]:MARKer:MAXimum[:GLOBal]       command only   Moves the main marker to the highest point on the specified
+                                                             trace
+  CALC[1|2|3|4]:MARK:MAXi[:GLOBal]:TRACk           ‡         Turns the peak tracking function on or off
+  CALC[1|2|3|4]:MARKer:MAXimum:LEFT           command only   Moves the main marker one peak to the left of its current
+                                                             location on the specified trace
+  CALC[1|2|3|4]:MARKer:MAXimum:RIGHt          command only   Moves the main marker one peak to the right of its current
+                                                             location on the specified trace
+  CALC[1|2|3|4]:MARKer:MODE                        ‡         Selects absolute or relative marker values
+  CALC[1|2|3|4]:MARKer:POSition                    ‡         Specifies the main marker’s independent axis position
+  CALC[1|2|3|4]:MARKer:POSition:POINt              ‡         Moves the main marker to a specific display point
+  CALC[1|2|3|4]:MARKer:REFerence:X                 ‡         Specifies the marker reference X-axis position
+  CALC[1|2|3|4]:MARKer:REFerence:Y                 ‡         Specifies the marker reference Y-axis position
+  CALC[1|2|3|4]:MARKer:SIDeband:CARRier            ‡         Specifies the carrier frequency used for sideband markers and
+                                                             calculations
+  CALC[1|2|3|4]:MARKer:SIDeband:COUNt              ‡         Specifies the number of sideband markers for the display
+  CALC[1|2|3|4]:MARKer:SIDeband:INCRement          ‡         Specifies the frequency increment (or delta) between
+                                                             sideband markers
+  CALC[1|2|3|4]:MARKer[:STATe]                     ‡         Turns on the main markers or turns off all markers and
+                                                             marker functions for a selected trace
+  CALC[1|2|3|4]:MARKer:X[:ABSolute]                ‡         Specifies the main marker’s X-axis position
+  CALC[1|2|3|4]:MARKer:X:RELative                  ‡         Specifies the marker reference X-axis position relative to the
+                                                             main marker
+  CALC[1|2|3|4]:MARKer:Y[:ABSolute]?           query only    Returns the main marker’s Y-axis position
+  CALC[1|2|3|4]:MARKer:Y:RELative                  ‡         Specifies the marker reference Y-axis position relative to the
+                                                             main marker
+  CALC[1|2|3|4]:MATH:CONStant[1|2|3|4|5]           ‡         Defines the value of one of the constant registers
+
+
+ ‡ Command form; add ‘’?’’ for query form
+
+
+
+
+A-4
+
+
+                                                                                 Agilent 35670A Command Summary
+
+
+               Subsystem Commands             Form                                Description
+  CALC[1|2|3|4]:MATH:DATA                       ‡         Loads a complete set of math definitions
+  CALC[1|2|3|4]:MATH[:EXPR[1|2|3|4|5]]          ‡         Defines a math function
+  CALC[1|2|3|4]:MATH:SELect                     ‡         Selects and displays the designated math function
+  CALC[1|2|3|4]:MATH:STATe                      ‡         Evaluates the currently selected math operation for the
+                                                          specified trace and displays the results
+  CALC[1|2|3|4]:SYNThesis:COPY             command only   Copies the contents of the curve fit table into the synthesis
+                                                          table
+  CALC[1|2|3|4]:SYNThesis:DATA                  ‡         Loads values into the synthesis table
+  CALC[1|2|3|4]:SYNThesis:DESTination           ‡         Selects the data register for the results of the synthesis
+                                                          operation
+  CALC[1|2|3|4]:SYNThesis:FSCale                ‡         Specifies a frequency scale for the synthesis operation
+  CALC[1|2|3|4]:SYNThesis:GAIN                  ‡         Specifies the gain constant
+  CALC[1|2|3|4]:SYNThesis[:IMMediate]      command only   Creates a frequency response curve from the synthesis table
+  CALC[1|2|3|4]:SYNThesis:SPACing               ‡         Specifies a linear or logarithmic scale for the X-axis data
+                                                          spacing
+  CALC[1|2|3|4]:SYNThesis:TDELay                ‡         Specifies a time delay value for the synthesis operation
+  CALC[1|2|3|4]:SYNThesis:TTYPe                 ‡         Converts the synthesis table to another table format
+  CALC[1|2|3|4]:UNIT:AMPLitude                  ‡         Selects the unit of amplitude for the Y-axis scale
+  CALC[1|2|3|4]:UNIT:ANGLe                      ‡         Specifies the unit for phase coordinates
+  CALC[1|2|3|4]:UNIT:DBReference                ‡         Specifies the reference for dB magnitude trace coordinates
+
+  CALC[1|2|3|4]:UNIT:DBReference:IM             ‡         Specifies the system’s reference impedance value in ohms
+  Pedance                                                 (Ω)
+  CALC[1|2|3|4]:UNIT:DBR:USER:LABel             ‡         Assigns a name to the Y-axis unit when CALC:UNIT:DBR
+                                                          ‘USER’
+  CALC[1|2|3|4]:UNIT:DBR:USER:REFerence         ‡         Specifies the reference level for CALC:UNIT:DBR ‘USER’
+  CALC[1|2|3|4]:UNIT:MECHanical                 ‡         Converts the Y-axis trace coordinates from the input’s
+                                                          transducer units to the selected engineering units on the
+                                                          display
+  CALC[1|2|3|4]:UNIT:VOLTage                    ‡         Selects the vertical unit for the display’s Y-axis
+  CALC[1|2|3|4]:UNIT:X                          ‡         Specifies the X-axis unit
+  CALC[1|2|3|4]:UNIT:X:ORDer:FACTor             ‡         Specifies the speed of rotation in Hertz per Order or RPM per
+                                                          Order
+  CALC[1|2|3|4]:UNIT:X:USER:FREQ:FACTor         ‡         Specifies the frequency conversion factor for user-defined
+                                                          X-axis units
+  CALC[1|2|3|4]:UNIT:X:USER:FREQ:LABel          ‡         Assigns a name to the user-defined X-axis units in the
+                                                          frequency domain
+  CALC[1|2|3|4]:UNIT:X:USER:TIME:FACTor         ‡         Specifies the time conversion factor for user-defined X-axis
+                                                          units
+
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+                                                                                                                        A-5
+
+
+Agilent 35670A Command Summary
+
+
+                  Subsystem Commands              Form                                Description
+  CALC[1|2|3|4]:UNIT:X:USER:TIME:LABel              ‡         Assigns a name to the user-defined X-axis units in the time
+                                                              domain
+  CALC[1|2|3|4]:WATerfall:COUNt                     ‡         Specifies the number of traces stored for waterfall displays
+  CALC[1|2|3|4]:WATerfall[:DATA]?               query only    Returns waterfall data that has been transformed to the
+                                                              currently selected coordinate transform (specified with
+                                                              CALC:FORMat)
+  CALC[1|2|3|4]:WATerfall:SLICe:COPY           command only   Copies the selected waterfall slice to the designated data
+                                                              register
+  CALC[1|2|3|4]:WATerfall:SLICe:SELect              ‡         Selects the waterfall slice at the specified X-axis position
+  CALC[1|2|3|4]:WATerfall:SLICe:SELect:POINt        ‡         Selects a waterfall slice by its display point value
+  CALC[1|2|3|4]:WATerfall:TRACe:COPY           command only   Saves the trace to the specified data register
+  CALC[1|2|3|4]:WATerfall:TRACe:SELect              ‡         Selects a waterfall trace by its Z-axis value
+  CALC[1|2|3|4]:WAT:TRACe:SELect:POINt              ‡         Selects a waterfall trace by its step value
+  CALC[1|2|3|4]:X:DATA?                         query only    Returns X-axis values that correspond to the Y-axis values
+                                                              read with the CALC:DATA? query
+
+  CALibration
+  CALibration[:ALL]?                            query only    Calibrates the analyzer and returns the result
+  CALibration:AUTO                                  ‡         Calibrates the analyzer or sets the state of the
+                                                              autocalibration function
+
+  DISPlay
+  DISPlay:ANNotation[:ALL]                          ‡         Turns the display of screen annotation on or off
+  DISPlay:BODE                                 command only   Displays a Bode diagram
+  DISPlay:BRIGhtness                                ‡         Adjusts the intensity of the display
+  DISPlay:ERRor                                command only   Displays text in the same format as the analyzer
+  DISPlay:EXTernal[:STATe]                          ‡         Enables the use of an external monitor
+  DISPlay:FORMat                                    ‡         Selects a format for displaying trace data
+  DISPlay:GPIB:ECHO                                 ‡         Enables and disables the echoing of GPIB command
+                                                              mnemonics to the analyzer’s screen
+  DISPlay:PROGram:KEY:BOX                           ‡         Draws a box around softkey in an Instrument BASIC program
+  DISPlay:PROGram:KEY:BRACket                       ‡         Draws a bracket around one or more softkeys in an
+                                                              Instrument BASIC program
+  DISPlay:PROGram[:MODE]                            ‡         Selects the portion of the analyzer’s screen to be used for
+                                                              Instrument BASIC program output
+  DISPlay:PROGram:VECTor:BUFFer[:STATe]             ‡         Enables or disables the buffering of lines drawn with
+                                                              Instrument BASIC’s graphics statements
+
+
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+A-6
+
+
+                                                                                               Agilent 35670A Command Summary
+
+
+                Subsystem Commands                      Form                                     Description
+ DISPlay:RPM[:STATe]                                      ‡             Turns on the display of the RPM indicator
+ DISPlay:STATe                                            ‡             Turns on (or turns off) the analyzer’s display
+
+ DISPlay:TCAPture:ENVelope[:STATe]          ‡                       Displays the envelope of the time
+                                                                         capture buffer
+ DISPlay:VIEW                                             ‡             Specifies what is displayed on the analyzer’s screen
+ DISP[:WIND[1|2|3|4]]:DTAB:MARKer[:STATe]                 ‡             Turns on or off the markers for data tables
+ DISPlay[:WINDow[1|2|3|4]]:DTABle[:STATe]                 ‡             Enables and displays a data table
+ DISPlay[:WINDow[1|2|3|4]]:LIMit:STATe                    ‡             Turns limit lines on or off in the specified display
+ DISP[:WINDow[1|2|3|4]]:POLar:CLOCkwise                   ‡             Specifies the direction of the vector in a polar diagram
+ DISPlay[:WINDow[1|2|3|4]]:POLar:ROTation                 ‡             Specifies the angle of rotation for the polar diagram
+ DISP[:WIND[1|2|3|4]]:TRAC:APOWer[:STATe]                 ‡             Turns on or off the display of the A-weight total power band
+ DISP[:WIND[1|2|3|4]]:TRAC:BPOW[:STATe]                   ‡             Turns on or off the display of the total power band
+ DISP[:WIND[1|2|3|4]]:TRACe:GRATicule:GRID[:STATe]        ‡             Turns on or off the display’s overlay grid
+ DISPlay[:WINDow[1|2|3|4]]:TRACe:LABel                    ‡             Loads a label for the specified trace
+ DISP[:WIND[1|2|3|4]]:TRAC:LAB:DEF[:STAT]                 ‡             Turns on or off the analyzer’s default title for the specified
+                                                                        trace
+ DISP[:WIND[1|2|3|4]]:TRAC:X:MATC[1|2|
+ 3|4]                                                command only       Modifies the X-axis scaling of a trace to match the X-axis
+                                                                        scaling of the reference trace
+ DISP[:WIND[1|2|3|4]]:TRAC:X[:SCAL]:AUTO                  ‡             Scales the measurement data to fit the trace box
+ DISP[:WIND[1|2|3|4]]:TRAC:X[:SCALe]:LEFT                 ‡             Specifies the first X-axis value on the display
+ DISP[:WIND[1|2|3|4]]:TRAC:X[:SCAL]:RIGHt                 ‡             Specifies the last X-axis value on the display
+ DISP[:WINDow[1|2|3|4]]:TRACe:X:SPACing                   ‡             Specifies X-axis scaling
+ DISP[:WIND[1|2|3|4]]:TRAC:Y:MATCh[1|2|
+ 3|4]                                                command only       Modifies the Y-axis scaling of a trace to match the Y-axis
+                                                                        scaling of the reference trace
+ DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCALe]:AUTO                 ‡             Scales and repositions the trace vertically to provide the best
+                                                                        display of trace data
+ DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCAL]:BOTT                  ‡             Specifies the value of the bottom reference point of the
+                                                                        display’s Y-axis scale
+ DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCAL]:CENT                  ‡             Specifies the value of the center reference point of the
+                                                                        display’s Y-axis scale
+ DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCAL]:PDIV                  ‡             Defines the height of each vertical division on the specified
+                                                                        trace
+ DISP[:WIND[1|2|3|4]]:TRAC:Y[:SCAL]:REF                   ‡             Determines the Y-axis reference position for the specified
+                                                                        display
+
+
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+                                                                                                                                     A-7
+
+
+Agilent 35670A Command Summary
+
+
+               Subsystem Commands                Form                                Description
+  DISP[:WIND[1|2|3|4]]:TRACe:Y[:SCALe]:TOP         ‡         Specifies the value of the top reference point of the display’s
+                                                             Y-axis scale
+  DISP[:WINDow[1|2|3|4]]:TRACe:Y:SPACing           ‡         Specifies scaling of the Y-axis for linear magnitude coordinate
+                                                             data
+  DISP[:WINDow[1|2|3|4]]:WATerfall:BASeline        ‡         Specifies the percentage of each trace that is concealed in
+                                                             the waterfall display
+  DISP[:WINDow[1|2|3|4]]:WATerfall:BOTTom          ‡         Specifies the bottom Z-axis value in a waterfall display
+  DISPlay[:WINDow[1|2|3|4]]:WATerfall:COUNt        ‡         Determines the number of traces displayed in the waterfall
+                                                             trace box
+  DISP[:WINDow[1|2|3|4]]:WATerfall:HEIGht          ‡         Specifies the height of a waterfall trace box
+  DISP[:WINDow[1|2|3|4]]:WATerfall:HIDDen          ‡         Turns on or off the removal of hidden waterfall traces
+  DISPlay[:WINDow[1|2|3|4]]:WATerfall:SKEW         ‡         Enables a skewed waterfall display
+  DISP[:WIND[1|2|3|4]]:WATerfall:SKEW:ANGLe        ‡         Specifies the amount of horizontal offset for waterfall
+                                                             displays
+  DISP[:WINDow[1|2|3|4]]:WATerfall[:STATe]         ‡         Turns on or off the waterfall display for the specified trace
+                                                             box
+  DISPlay[:WINDow[1|2|3|4]]:WATerfall:TOP          ‡         Specifies the top Z-axis value in a waterfall display
+
+  FORMat
+  FORMat[:DATA]                                    ‡         Specifies the data type and date encoding to be used during
+                                                             transfers of a data block
+
+  HCOPy
+  HCOPy:COLor:DEFault                         command only   Specifies default values for the plotter pen assignments
+  HCOPy:DESTination                                ‡         Specifies where the print or plot operation is sent: either to a
+                                                             device or to a file on the default disk
+  HCOPy:DEVice:LANGuage                            ‡         Specifies the format of the plot/print output
+  HCOPy:DEVice:SPEed                               ‡         Specifies the plotting speed for all plotting operations
+                                                             initiated by the analyzer
+  HCOPy[:IMMediate]                           command only   Plots or prints the currently specified item
+  HCOPy:ITEM:ALL[:IMMediate]                  command only   Plots or prints the entire screen
+  HCOPy:ITEM:FFEed:STATe                           ‡         Turns the page-eject feature on or off
+  HCOPy:ITEM:LABel:COLor                           ‡         Selects the pen used for plotting miscellaneous annotations
+  HCOPy:ITEM:LABel:STATe                           ‡         Prints a label on the plot and print output
+  HCOPy:ITEM:LABel:TEXT                            ‡         Specifies a label for plot and print output
+  HCOPy:ITEM:TDSTamp:FORMat                        ‡         Specifies the format of the time stamp used for plotting and
+                                                             printing
+  HCOPy:ITEM:TDSTamp:STATe                         ‡         Turns a time stamp on or off for print and plot operations
+  HCOP:ITEM[:WINDow[1|2|3|4]]:TRACe:COLor          ‡         Selects the pen used to plot the specified trace and
+                                                             annotation
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+A-8
+
+
+                                                                                          Agilent 35670A Command Summary
+
+
+                Subsystem Commands                    Form                                 Description
+  HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe
+  :GRATicule:COLor                                      ‡         Selects the pen used to plot the trace graticules
+  HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe
+  :GRATicule[:IMMediate]                           command only   Plots or prints all trace graticules
+  HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe[:IMMediate]   command only   Plots or prints the currently displayed trace(s)
+  HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:LIMit:LTYPe        ‡         Selects the line type for the specified limit line
+  HCOP:ITEM[:WIND[1|2|3|4]]:TRACe:LTYPe                 ‡         Selects the line type for the specified trace
+  HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe:MARKer:COLo        ‡         Selects the pen used to plot markers for the specified trace
+  r
+  HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe
+  :MARKer[:IMMediate]                              command only   Plots or prints the all currently displayed markers
+  HCOPy:ITEM[:WINDow[1|2|3|4]]:TRACe
+  :MARKer:REFerence[:IMMediate]                    command only   Plots or prints the marker reference for the currently
+                                                                  displayed trace(s)
+  HCOPy:PAGE:DIMensions:AUTO                            ‡         Specifies P1 and P2 values for a plotter
+  HCOPy:PAGE:DIMensions:USER:LLEFt                      ‡         Specifies the lower left position (P1) of the plot area
+  HCOPy:PAGE:DIMensions:USER:URIGht                     ‡         Specifies the upper right position (P2) of the plot area
+  HCOPy:PLOT:ADDRess                                    ‡         Tells the analyzer which GPIB address is assigned to your
+                                                                  plotter
+  HCOPy:PRINt:ADDRess                                   ‡         Tells the analyzer which GPIB address is assigned to your
+                                                                  printer
+  HCOPy:TITLe[1|2]                                      ‡         Specifies a label for plot and print output
+
+  INITiate
+  INITiate:CONTinuous                                   ‡         Sets the trigger system to a continuously initiated state
+  INITiate[:IMMediate]                             command only   Starts a measurement and forces the trigger system to exit
+                                                                  the idle state
+
+  INPut
+  INPut[1|2|3|4]:BIAS[:STATe]                           ‡         Enables/disables the ICP supply on the corresponding input
+                                                                  channel
+  INPut[1|2|3|4]:COUPling                               ‡         Selects AC or DC coupling for the specified channel
+  INPut[1|2|3|4]:FILTer:AWEighting[:STATe]              ‡         Enables/disables the A-weight filter on the specified input
+                                                                  channel
+  INPut[1|2|3|4]:FILTer[:LPASs][:STATe]                 ‡         Enables/disables the anti-alias filter for the specified input
+                                                                  channel
+  INPut[1|2|3|4]:LOW                                    ‡         Sets the specified channel’s input shield to float or to ground
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+                                                                                                                                A-9
+
+
+Agilent 35670A Command Summary
+
+
+               Subsystem Commands              Form                                Description
+  INPut[1|2|3|4]:REFerence:DIRection             ‡         Sets the direction for the transducer point
+  INPut[1|2|3|4]:REFerence:POINt                 ‡         Sets the number for the transducer point
+  INPut[1|2|3|4][:STATe]                         ‡         Specifies one-channel
+
+  INSTrument
+  INSTrument:NSELect                             ‡         Selects one of the analyzer’s six major instrument modes
+  INSTrument[:SELect]                            ‡         Selects one of the analyzer’s six major instrument modes
+
+  MEMory
+  MEMory:CATalog[:ALL]?                      query only    Returns information on the current contents and state of the
+                                                           analyzer’s memory
+  MEMory:CATalog:NAME?                       query only    Returns information about memory usage allocated for a
+                                                           specific item
+  MEMory:DELete:ALL                         command only   Purges all allocated memory in the analyzer
+  MEMory:DELete[:NAME]                      command only   Purges the memory allocated for a specific item
+  MEMory:FREE[:ALL]?                         query only    Returns information on the state of the analyzer’s memory
+
+  MMEMory
+  MMEMory:COPY                              command only   Copies the contents of one disk to another or one file to
+                                                           another
+  MMEMory:DELete                            command only   Deletes one file or the contents of an entire disk
+  MMEMory:DISK:ADDRess                           ‡         Tells the analyzer which GPIB address is assigned to your
+                                                           external disk
+  MMEMory:DISK:UNIT                              ‡         Specifies the unit of the external disk drive
+  MMEMory:FSYStem?                           query only    Returns the type of file system for the default disk
+  MMEMory:INITialize                        command only   Formats the specified disk
+  MMEMory:LOAD:CFIT                         command only   Loads a curve fit table into the analyzer from a file on the
+                                                           specified disk
+  MMEMory:LOAD:CONTinue                          ‡         Continues the load operation of time capture and waterfall
+                                                           files saved on multiple disks
+  MMEMory:LOAD:DTABle:TRACe[1|2|3|4]        command only   Loads a data table into the analyzer from a file on the
+                                                           specified disk
+  MMEMory:LOAD:LIMit:LOWer:TRACe[1|2|3|4]   command only   Loads a lower limit for the specified trace from a file on the
+                                                           specified disk
+  MMEMory:LOAD:LIMit:UPPer:TRACe[1|2|3|4]   command only   Loads an upper limit for the specified trace from a file on the
+                                                           specified disk
+ ‡ Command form; add ‘’?’’ for query form
+
+
+
+
+A-10
+
+
+                                                                                  Agilent 35670A Command Summary
+
+
+               Subsystem Commands             Form                                   Description
+  MMEMory:LOAD:MATH                        command only   Loads a complete set of math definitions into the analyzer
+                                                          from the specified disk
+  MMEMory:LOAD:PROGram                     command only   Loads an Instrument BASIC program into the analyzer from a
+                                                          file on the specified disk
+  MMEMory:LOAD:STATe                       command only   Loads an instrument state into the analyzer from the specified
+                                                          disk
+  MMEMory:LOAD:SYNThesis                   command only   Loads a synthesis table into the analyzer from a file on the
+                                                          specified disk
+  MMEMory:LOAD:TCAPture                    command only   Loads a time capture file from the specified disk
+  MMEMory:LOAD:TRACe                       command only   Loads a trace into the analyzer from the specified disk
+  MMEMory:LOAD:WATerfall                   command only   Loads a waterfall file into the analyzer from a file on the
+                                                          specified disk
+  MMEMory:MDIRectory                       command only   @RSUB1 = Command Syntax:
+  MMEMory:MOVE                             command only   Renames a file
+  MMEMory:MSIS                                  ‡         Specifies a default disk
+  MMEMory:NAME                                  ‡         Specifies a filename for the output of a print or plot operation
+  MMEMory:STORe:CFIT                       command only   Stores a curve fit table to a file on the specified disk
+  MMEMory:STORe:CONTinue                        ‡         Splits a large file (a time capture file or a waterfall file) over
+                                                          multiple disks
+  MMEMory:STORe:DTABle:TRACe[1|2|3|4]      command only   Saves the specified data table to a file on the specified disk
+  MMEM:STORe:LIMit:LOWer:TRACe[1|2|3|4]    command only   Saves the lower limit of the specified trace to a file on the
+                                                          specified disk
+  MMEM:STORe:LIMit:UPPer:TRACe[1|2|3|4]    command only   Saves the upper limit of the specified trace to a file on the
+                                                          specified disk
+  MMEMory:STORe:MATH                       command only   Saves a complete set of math definitions to a file on the
+                                                          specified disk
+  MMEMory:STORe:PROGram                    command only   Saves an Instrument BASIC program to a file on the specified
+                                                          disk
+  MMEMory:STORe:PROGram:FORMat                  ‡         Specifies the format Agilent Instrument BASIC programs are
+                                                          stored
+  MMEMory:STORe:STATe                      command only   Saves the instrument state to a file on the specified disk
+  MMEMory:STORe:SYNThesis                  command only   Stores a synthesis table to a file on the specified disk
+  MMEMory:STORe:TCAPture                   command only   Saves the time capture buffer to a file on the specified disk
+  MMEMory:STORe:TRACe                      command only   Saves the specified trace to a file on the specified disk
+  MMEMory:STORe:WATerfall                  command only   Saves the current waterfall display to a file on the specified
+                                                          disk
+
+  OUTPut
+  OUTPut:FILTer[:LPASs][:STATe]                 ‡         Turns on a low pass filter for the arbitrary source
+
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+                                                                                                                       A-11
+
+
+Agilent 35670A Command Summary
+
+
+               Subsystem Commands              Form                               Description
+  OUTPut[:STATe]                                 ‡         Enables the analyzer’s internal source
+
+  PROGram
+  PROGram:EDIT:ENABle                            ‡         Disables the Agilent Instrument BASIC editor
+  PROGram:EXPLicit:DEFine                        ‡         Loads an Agilent Instrument BASIC program into the specified
+                                                           program buffer from an external controller
+  PROGram:EXPLicit:LABel                         ‡         Loads a softkey label for the specified
+  HP Instrument BASIC program
+  PROGram[:SELected]:DEFine                      ‡         Loads an HP Instrument BASIC program from an external
+                                                           controller into the active program buffer
+  PROGram[:SELected]:DELete:ALL             command only   Deletes all HP Instrument BASIC programs stored in the
+                                                           analyzer
+  PROGram[:SELected]:DELete[:SELected]      command only   Deletes the active HP Instrument BASIC program
+  PROGram[:SELected]:LABel                       ‡         Loads a softkey label for the active HP Instrument BASIC
+                                                           program
+  PROGram[:SELected]:MALLocate                   ‡         Allocates memory space for HP Instrument BASIC programs
+  PROGram[:SELected]:NAME                        ‡         Selects an HP Instrument BASIC program
+  PROGram[:SELected]:NUMBer                      ‡         Loads a new value for the specified numeric variable in the
+                                                           active HP Instrument BASIC program
+  PROGram[:SELected]:STATe                       ‡         Selects the state of the active HP Instrument BASIC program
+  PROGram[:SELected]:STRing                      ‡         Loads a new value for the specified string variable for the
+                                                           active HP Instrument BASIC program
+
+  [:SENSe]
+  [SENSe:]AVERage:CONFidence                     ‡         Specifies the confidence level used in equal confidence
+                                                           averaging in octave measurements
+  [SENSe:]AVERage:COUNt                          ‡         Specifies a count or a weighting factor for the averaged
+                                                           measurement data
+  [SENSe:]AVERage:HOLD                           ‡         Specifies the type of hold used in averaging octave
+                                                           measurements
+  [SENSe:]AVERage:IMPulse                        ‡         Enables impulse detection in octave measurements
+  [SENSe:]AVERage:IRESult:RATE                   ‡         Specifies how often the display is updated when fast average
+                                                           mode is on
+  [SENSe:]AVERage:IRESult[:STATe]                ‡         Selects fast average mode
+  [SENSe:]AVERage:PREView                        ‡         Specifies the type of preview averaging
+  [SENSe:]AVERage:PREView:ACCept            command only   Accept the current time record during preview averaging
+  [SENSe:]AVERage:PREView:REJect            command only   Reject the current time record during preview averaging
+
+ ‡ Command form; add ‘’?’’ for query form
+
+
+
+
+A-12
+
+
+                                                                                   Agilent 35670A Command Summary
+
+
+                 Subsystem Commands              Form                               Description
+  [SENSe:]AVERage:PREView:TIME                     ‡         Specifies the amount of time the analyzer waits for a
+                                                             response in timed preview averaging
+  [SENSe:]AVERage[:STATe]                          ‡         Turns the selected averaging function (AVER:TYPE) on or off
+  [SENSe:]AVERage:TCONtrol                         ‡         Specifies how the analyzer behaves after the count
+                                                             (AVER:COUN) is reached
+  [SENSe:]AVERage:TIME                             ‡         Specify the time period used in averaging octave
+                                                             measurements and histograms
+  [SENSe:]AVERage:TYPE                             ‡         Specifies the type of averaging the analyzer performs
+  [SENSe:]FEED                                     ‡         Specifies the data source for a measurement; either from the
+                                                             input channels or from the time capture buffer
+  [SENSe:]FREQuency:BLOCksize                      ‡         Specifies the number of real-time data points displayed on the
+                                                             analyzer’s screen
+  [SENSe:]FREQuency:CENTer                         ‡         Specifies the center frequency for the current measurement
+  [SENSe:]FREQuency:MANual                         ‡         Selects a discrete point to be measured during manual sweep
+                                                             mode
+  [SENSe:]FREQuency:RESolution                     ‡         Specifies the frequency measurement resolution for FFT and
+                                                             swept sine instrument modes
+  [SENSe:]FREQuency:RESolution:AUTO                ‡         Selects auto resolution for swept sine instrument mode
+  [SENS:]FREQuency:RESolution:AUTO:MCHange         ‡         Specifies the maximum change permitted between the
+                                                             frequency response of the current measurement point and the
+                                                             frequency response of the previous measurement point
+  [SENSe:]FREQuency:RESolution:AUTO:MINimum        ‡         Specifies the initial resolution of a swept sine measurement
+                                                             with automatic resolution
+  [SENSe:]FREQuency:RESolution:OCTave              ‡         Specifies the type of octave measurement
+  [SENSe:]FREQuency:SPAN                           ‡         Specifies the frequency bandwidth to be measured
+  [SENSe:]FREQuency:SPAN:FULL                 command only   Sets the analyzer to the widest frequency span available for
+                                                             the current instrument mode
+  [SENSe:]FREQuency:SPAN:LINK                      ‡         Specifies the frequency parameter which remains constant if
+                                                             frequency span or record length is modified
+  [SENSe:]FREQuency:STARt                          ‡         Specifies the start (lowest) frequency for the frequency band
+                                                             of the current measurement
+  [SENSe:]FREQuency:STEP[:INCRement]               ‡         Specifies the step size which is used when changing
+                                                             frequency parameters
+  [SENSe:]FREQuency:STOP                           ‡         Sets the stop frequency to the specified value
+  [SENSe:]HISTogram:BINS                           ‡         Specifies the number of bins in a histogram
+  [SENSe:]ORDer:MAXimum                            ‡         Specifies the number of orders to be displayed
+  [SENSe:]ORDer:RESolution                         ‡         Specifies order resolution
+  [SENSe:]ORDer:RESolution:TRACk                   ‡         Specifies the number of points per order track
+  [SENSe:]ORDer:RPM:MAXimum                        ‡         Specifies the maximum rotational speed range you want to
+                                                             analyze
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+                                                                                                                      A-13
+
+
+Agilent 35670A Command Summary
+
+
+               Subsystem Commands                        Form                               Description
+  [SENSe:]ORDer:RPM:MINimum                                ‡         Specifies the minimum rotational speed range you want to
+                                                                     analyze
+  [SENSe:]ORDer:TRACk[1|2|3|4|5]                           ‡         Specify the order number for the selected track
+  [SENSe:]ORDer:TRACk[1|2|3|4|5]:STATe                     ‡         Selects order track or order spectrum measurements
+  [SENSe:]REFerence                                        ‡         Specifies the reference channel(s)
+  [SENSe:]REJect:STATe                                     ‡         Turns overload rejection on or off
+  [SENSe:]SWEep:DIRection                                  ‡         Specifies the direction of the sweep
+  [SENSe:]SWEep:DWELl                                      ‡         Specifies the integration time for swept sine measurements
+  [SENSe:]SWEep:MODE                                       ‡         Specifies automatic or manual sweep modes
+  [SENSe:]SWEep:OVERlap                                    ‡         Specifies the maximum amount of time record overlap
+  [SENSe:]SWEep:SPACing                                    ‡         Selects linear or logarithmic spacing between measurement
+                                                                     data points
+  [SENSe:]SWEep:STIMe                                      ‡         Specifies the settling time for a swept sine measurement
+  [SENSe:]SWEep:TIME                                       ‡         Specifies the length of the time record in seconds
+  [SENSe:]TCAPture:ABORt                              command only   Stops the time capture process
+  [SENSe:]TCAPture:DELete                             command only   Removes the time capture buffer
+  [SENSe:]TCAPture[:IMMediate]                        command only   Starts the collection of data for the time capture process
+  [SENSe:]TCAPture:LENGth                                  ‡         Specifies the length of the time capture buffer
+  [SENSe:]TCAPture:MALLocate                          command only   Allocates memory for the time capture buffer
+  [SENSe:]TCAPture:STARt[1|2|3|4]                          ‡         Specifies the beginning of the time capture data used in a
+                                                                     measurement
+  [SENSe:]TCAPture:STOP[1|2|3|4]                           ‡         Specifies the end of the time capture data used in a
+                                                                     measurement
+  [SENSe:]TCAPture:TACHometer:RPM:MAXimum                  ‡         Specifies the tachometer’s maximum RPM when included in
+                                                                     the time capture buffer
+  [SENSe:]TCAPture:TACHometer[:STATe]                      ‡         Directs the analyzer to include the tachometer input signal in
+                                                                     the time capture buffer
+  [SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:AUTO                 ‡         Automatically selects the best range on the specified channel
+                                                                     for the current input signal
+  [SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:AUTO:DIRectio        ‡         Selects the type of autorange; up/down or up only
+  n
+  [SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:USER:LA         ‡         Assigns a name to the transducer units for the specified input
+  Bel                                                                channel when VOLT:RANG:UNIT:XDCR:LABel is USER
+  [SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:USER:SF         ‡         Specifies the transducer sensitivity for transducer units
+  ACtor
+  [SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:USER[:ST        ‡         Enables the use of transducer units
+  ATe]
+
+
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+A-14
+
+
+                                                                                   Agilent 35670A Command Summary
+
+
+              Subsystem Commands                      Form                           Description
+ [SENSe:]VOLTage[1|2|3|4][:DC]:RANGe:UNIT:XDCR:LA      ‡     Specifies a transducer unit for the specified channel
+ Bel
+ [SENS:]VOLT[1|2|3|4][:DC]:RANGe[:UPPer]               ‡     Specifies the input range for the selected channel
+ [SENSe:]WINDow[1|2|3|4]:EXPonential                   ‡     Specifies the time constant for the exponential window
+                                                             function
+ [SENSe:]WINDow[1|2|3|4]:FORCe                         ‡     Specifies the width of the force window
+ [SENSe:]WINDow[1|2|3|4]:ORDer:DC                      ‡     Directs the analyzer to include the DC bin in the composite
+                                                             power calculation (order track measurements)
+ [SENSe:]WINDow[1|2|3|4][:TYPE]                        ‡     Selects the type of windowing function
+
+ SOURce
+ SOURce:BURSt                                          ‡     Sets the burst length for the burst source types
+ SOURce:FREQuency[:CW]                                 ‡     Sets the frequency of the sine source
+ SOURce:FREQuency:FIXed                                ‡     Sets the frequency of the sine source type
+ SOURce:FUNCtion[:SHAPe]                               ‡     Specifies the source output
+ SOURce:USER:CAPTure                                   ‡     Specifies which channel of time capture data to use
+ SOURce:USER[:REGister]                                ‡     Specifies the data register which contains the data for the
+                                                             arbitrary source
+ SOURce:USER:REPeat                                    ‡     Enables the source repeat function
+ SOURce:VOLTage[:LEVel]:AUTO                           ‡     Enables the autolevel feature in swept sine measurements
+                                                             (INST:SEL SINE)
+ SOURce:VOLTage[:LEVel][:IMMediate][:AMPLitude]        ‡     Specifies the source output level
+ SOURce:VOLTage[:LEVel][:IMMediate]:OFFSet             ‡     Specifies a DC offset for the source output
+ SOURce:VOLTage[:LEVel]:REFerence                      ‡     Specifies the amplitude of the reference input channel for the
+                                                             autolevel feature in swept sine measurements (INST:SEL
+                                                             SINE)
+ SOURce:VOLTage[:LEVel]:REFerence:CHANnel              ‡     Selects the reference input channel for the autolevel feature
+                                                             in swept sine measurements (INST:SEL SINE)
+ SOURce:VOLTage[:LEVel]:REFerence:TOLerance            ‡     Specifies the sensitivity of the autolevel algorithm in swept
+                                                             sine measurements (INST:SEL SINE)
+ SOURce:VOLTage:LIMit[:AMPLitude]                      ‡     Sets the maximum limit used by the autolevel algorithm to
+                                                             adjust the source’s amplitude in swept sine measurements
+                                                             (INST:SEL SINE)
+ SOURce:VOLTage:LIMit:INPut                       ‡          Sets the maximum amplitude of the non-reference
+                                                             input channels for the autolevel
+                                                             feature in swept sine measurements
+                                                             (INST:SEL SINE)
+ SOURce:VOLTage:SLEW                                   ‡     Specifies the source amplitude ramp rate in swept sine
+                                                             measurements (INST:SEL SINE)
+
+ STATus
+
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+                                                                                                                      A-15
+
+
+Agilent 35670A Command Summary
+
+
+               Subsystem Commands              Form                                 Description
+  STATus:DEVice:CONDition?                   query only    Reads and clears the Device State condition register
+  STATus:DEVice:ENABle                           ‡         Sets and queries bits in the Device State enable register
+  STATus:DEVice[:EVENt]?                     query only    Reads and clears the Device State event register
+  STATus:DEVice:NTRansition                      ‡         Sets and queries bits in the Device Status negative transition
+                                                           register
+  STATus:DEVice:PTRansition                      ‡         Sets and queries bits in the Device State positive transition
+                                                           register
+  STATus:OPERation:CONDition?                query only    Reads the Operation Status condition register
+  STATus:OPERation:ENABle                        ‡         Sets and queries bits in the Operation Status enable register
+  STATus:OPERation[:EVENt]?                  query only    Reads and clears the Operation Status event register
+  STATus:OPERation:NTRansition                   ‡         Sets and queries bits in the Operation Status negative
+                                                           transition register
+  STATus:OPERation:PTRansition                   ‡         Sets bits in the Operation Status positive transition register
+  STATus:PRESet                             command only   Sets bits in most enable and transition registers to their
+                                                           default state
+  STATus:QUEStionable:CONDition?             query only    Reads and clears the Questionable Status condition register
+  STATus:QUEStionable:ENABle                     ‡         Sets and queries bits in the Questionable Status enable
+                                                           register
+  STATus:QUEStionable[:EVENt]?               query only    Reads and clears the Questionable Status event register
+  STATus:QUEStionable:LIMit:CONDition?       query only    Reads and clears the Limit Fail condition register
+  STATus:QUEStionable:LIMit:ENABle               ‡         Sets and queries bits in the Limit Fail enable register
+  STATus:QUEStionable:LIMit[:EVENt]?         query only    Reads and clears the Limit Fail event register
+  STATus:QUEStionable:LIMit:NTRansition          ‡         Sets and queries bits in the Limit Fail negative transition
+                                                           register
+  STATus:QUEStionable:LIMit:PTRansition          ‡         Sets queries bits in the Limit Fail positive transition register
+  STATus:QUEStionable:NTRansition                ‡         Sets and queries bits in the Questionable Status negative
+                                                           transition register
+  STATus:QUEStionable:PTRansition                ‡         Sets and queries bits in the Questionable Status positive
+                                                           transition register
+  STATus:QUEStionable:VOLTage:CONDition?     query only    Reads the Questionable Voltage condition register
+  STATus:QUEStionable:VOLTage:ENABle             ‡         Sets and queries bits in the Questionable Voltage enable
+                                                           register
+  STATus:QUEStionable:VOLTage[:EVENt]?       query only    Reads and clears the Questionable Voltage event register
+  STATus:QUEStionable:VOLTage:NTRansition        ‡         Sets and queries bits in the Questionable Voltage negative
+                                                           transition register
+  STATus:QUEStionable:VOLTage:PTRansition        ‡         Sets bits in the Questionable Voltage positive transition
+                                                           register
+  STATus:USER:ENABle                             ‡         Sets and queries bits in the User Defined enable register
+  STATus:USER[:EVENt]?                       query only    Reads and clears the User Defined event register
+
+ ‡ Command form; add ‘’?’’ for query form
+
+
+
+
+A-16
+
+
+                                                                                             Agilent 35670A Command Summary
+
+
+                Subsystem Commands                       Form                                 Description
+  STATus:USER:PULSe                                   command only   Sets bits in the User Defined event register
+
+  SYSTem
+  SYSTem:BEEPer[:IMMediate]                           command only   Generates the tone at a given frequency from the analyzer’s
+                                                                     beeper
+  SYSTem:BEEPer:STATe                                      ‡         Enables the analyzer’s beeper
+  SYSTem:COMMunicate:GPIB[:SELF]:ADDRess                   ‡         Sets the analyzer’s GPIB address
+  SYSTem:COMMunicate:SERial[:RECeive]:BAUD                 ‡         Specifies the data-transfer rate between the analyzer and
+                                                                     RS-232-C peripheral devices
+  SYSTem:COMMunicate:SERial[:RECeive]:BITS                 ‡         Specifies the number of bits in a character for the RS-232-C
+                                                                     interface
+  SYSTem:COMMunicate:SERial[:RECeive]:PACE                 ‡         Sets the RS-232-C receiver handshake pacing type
+  SYSTem:COMMunicate:SERial[:RECeive]:PARity:CHECk         ‡         Enables RS-232-C parity verification capability
+  SYSTem:COMMunicate:SERial[:RECeive]:PARity[:TYPE]        ‡         Sets the parity generated for characters transmitted over the
+                                                                     RS-232-C interface
+  SYSTem:COMMunicate:SERial[:RECeive]:SBITs                ‡         Specifies the number of “stop bits” sent with each character
+                                                                     over the RS-232-C interface
+  SYSTem:COMMunicate:SERial:TRANsmit:PACE                  ‡         Sets the RS-232 transmitter handshake pacing type
+  SYSTem:DATE                                              ‡         Sets the date in the analyzer’s battery-backed clock
+  SYSTem:ERRor?                                        query only    Returns one error message from the analyzer’s error queue
+  SYSTem:FAN[:STATe]                                       ‡         Sets the fan’s operating mode
+  SYSTem:FLOG:CLEar                                   command only   Clears the fault log of all entries
+  SYSTem:KEY                                               ‡         Writes or queries front-panel key presses
+  SYSTem:KLOCk                                             ‡         Disables the keyboard
+  SYSTem:POWer:SOURce?                                 query only    Queries the setting of the rear-panel power select switch
+  SYSTem:POWer:STATe                                       ‡         Turns off the analyzer’s power
+  SYSTem:PRESet                                       command only   Returns most of the analyzer’s parameters to their preset
+                                                                     states
+  SYSTem:SET                                               ‡         Transfers an instrument state between the analyzer and an
+                                                                     external controller
+  SYSTem:TIME                                              ‡         Sets the time in the analyzer’s battery-backed clock
+  SYSTem:VERSion?                                      query only    Returns the SCPI version to which the analyzer complies
+
+  TEST
+  TEST:LOG:CLEar                                      command only   Clears the test log
+  TEST:LONG                                           command only   Executes the long confidence test
+  TEST:LONG:RESult?                                    query only    Returns the overall result of the long confidence test
+
+
+‡ Command form; add ‘’?’’ for query form
+
+
+
+
+                                                                                                                              A-17
+
+
+Agilent 35670A Command Summary
+
+
+                  Subsystem Commands            Form                                Description
+
+  TRACe
+  TRACe[:DATA]                                    ‡         Stores data to the specified data register
+  TRACe:WATerfall[:DATA]                          ‡         Stores data to the specified waterfall register
+  TRACe:X[:DATA]?                             query only    Returns the X-axis data for trace displays
+  TRACe:X:UNIT?                               query only    Returns the unit for the x-axis for trace displays
+  TRACe:Z[:DATA]?                             query only    Returns the Z-axis data for waterfall displays
+  TRACe:Z:UNIT?                               query only    Returns the unit for the z-axis in waterfall displays
+
+  TRIGger
+  TRIGger:EXTernal:FILTer[:LPAS][:STATe]          ‡         Turns on a low pass filter for the external trigger
+  TRIGger:EXTernal:LEVel                          ‡         Specifies the level of the external input signal which causes
+                                                            the analyzer to trigger
+  TRIGger:EXTernal:RANGe                          ‡         Selects the range for the external trigger’s level
+  TRIGger[:IMMediate]                        command only   Triggers the analyzer if TRIG:SOUR is BUS
+  TRIGger:LEVel                                   ‡         Specifies the level of the input signal which causes the
+                                                            analyzer to trigger
+  TRIGger:SLOPe                                   ‡         Specifies the slope of the signal which triggers the analyzer
+  TRIGger:SOURce                                  ‡         Selects the source of the trigger event
+  TRIGger:STARt[1|2|3|4]                          ‡         Specifies a pre-trigger or a post-trigger delay for the specified
+                                                            channel
+  TRIGger:TACHometer:HOLDoff                      ‡         Specifies a time interval in which the tachometer trigger is
+                                                            inhibited
+  TRIGger:TACHometer:LEVel                        ‡         Specifies the level of the tachometer’s input signal which
+                                                            causes the analyzer to trigger
+  TRIGger:TACHometer:PCOunt                       ‡         Specifies the number of tachometer pulses that occur in one
+                                                            revolution of the shaft
+  TRIGger:TACHometer:RANGe                        ‡         Specifies the input range of the analyzer’s tachometer
+  TRIGger:TACHometer[:RPM]?                   query only    Reads and returns the current RPM value for the analyzer’s
+                                                            tachometer
+  TRIGger:TACHometer:SLOPe                        ‡         Specifies the slope of the tachometer input signal to be used
+                                                            in RPM step arming or order tracking
+  ‡ Command form; add ``?’’ for query form
+
+
+
+
+ ‡ Command form; add ‘’?’’ for query form
+
+
+
+
+A-18
+
+
+                                                         B
+
+Cross-Reference from Front-Panel Keys to GPIB Commands
+
+
+
+
+                                                                                                     B
+
+Cross-Reference from Front-Panel Keys to GPIB Commands
+
+Introduction
+
+This section lists analyzer hardkeys and softkeys and their equivalent GPIB commands.
+
+Softkeys are indented to indicate their position in the menu tree. Keys that do not have an equivalent
+GPIB command are excluded from the list. Keys which appear in multiple menus may appear only once.
+For example, time capture is available in most instrument modes and appears in multiple Measurement
+Data hardkey menus. The GPIB command for time capture is only listed once.
+
+Multiple GPIB commands may be required for a single softkey. In these cases, the entire command string
+is listed. The command string includes valid parameter values.
+
+You can also determine the equivalent GPIB command for any key sequence by turning on the GPIB
+echo facility. With GPIB echo on, the analyzer displays the equivalent GPIB command for each front
+panel key sequence. To turn on GPIB echo, press the following keys:
+    [ Local/GPIB ]
+       [ GPIB ECHO ON OFF ] to highlight ON.
+
+
+
+
+                                                                                                     B-1
+
+
+Cross-Reference from Front-Panel Keys
+to GPIB Commands
+
+
+Measurement Group
+
+Front Panel Key                            GPIB Command
+
+  Inst Mode
+
+ [ FFT ANALYSIS ]                       INSTrument:SELect FFT
+ [ OCTAVE ANALYSIS ]                    INSTrument:SELect OCTave
+ [ ORDER ANALYSIS ]                     INSTrument:SELect ORDer
+ [ SWEPT SINE ]                         INSTrument:SELect SINE
+ [ CORRELATN ANALYSIS ]                 INSTrument:SELect CORRelation
+ [ HISTOGRAM / TIME ]                   INSTrument:SELect HISTogram
+ [ CAPTURE ON OFF ]                     [SENSe:]FEED INPut|TCAPture
+ [ 1 CHANNEL ]                          INPut2[:STATe] OFF
+ [ 2 CHANNELS ]                         INPut2[:STATe] ON
+ [ 4 CHANNELS ]                         INPut4[:STATe] ON
+ [ REF CHANNELS 1 1,3 ]                 [SENSe:]REFerence SINGle|PAIR
+ [ TIME CAPTURE ]
+   [ MEAS FROM INP BUFR ]               [SENSe:]FEED INPut|TCAPture
+   [ FILL BUFFER ]                      [SENSe:]TCAPture[:IMMediate]
+   [ ABORT FILL ]                       [SENSe:]TCAPture:ABORt
+   [ BUFFER LENGTH ]                    [SENSe:]TCAPture:LENGth 0~9.9e+37[S|BLK|PNT]
+   [ ALLOCATE BUFFER ]
+     [ CONFIRM ALLOCATE ]               [SENSe:]TCAPture:MALLocate
+   [ REMOVE CAPTURE]
+     [ CONFIRM REMOVE ]                 [SENSe:]TCAPture:DELete
+   [ TACHOMETR OPTIONS]
+     [ TACH DATA ON OFF ]               [SENSe:]TCAPture:TACHometer[:STATe] OFF|0|ON|1
+     [ MAX RPM ]                        [SENSe:]TCAPture:TACHometer:RPM:MAXimum 0~9.9e+37
+   [ ANALYSIS REGION]
+     [ STRT TIME CHANNEL 1 ]            [SENSe:]TCAPture:STARt1 0~9.9e+37[S|BLK|PNT]
+     [ STOP TIME CHANNEL 1 ]            [SENSe:]TCAPture:STOP1 0~9.9e+37[S|BLK|PNT]
+     [ STRT TIME CHANNEL 2 ]            [SENSe:]TCAPture:STARt2 0~9.9e+37[S|BLK|PNT]
+     [ STOP TIME CHANNEL 2 ]            [SENSe:]TCAPture:STOP2 0~9.9e+37[S|BLK|PNT]
+      [ STRT TIME CHANNEL 3 ]           [SENSe:]TCAPture:STARt3 0~9.9e+37[S|BLK|PNT]
+      [ STOP TIME CHANNEL 3 ]           [SENSe:]TCAPture:STOP3 0~9.9e+37[S|BLK|PNT]
+      [ STRT TIME CHANNEL 4 ]           [SENSe:]TCAPture:STARt4 0~9.9e+37[S|BLK|PNT]
+      [ STOP TIME CHANNEL 4 ]           [SENSe:]TCAPture:STOP4 0~9.9e+37[S|BLK|PNT]
+   [ ENVELOPE ON OFF ]                  DISPlay:TCAPture:ENVelope ON OFF
+
+
+
+
+B-2
+
+
+                                                                      Cross-Reference from Front-Panel Keys
+                                                                                         to GPIB Commands
+
+Front Panel Key             GPIB Command
+
+ Freq
+
+
+
+ [ SPAN ]                [SENSe:]FREQuency:SPAN 0.015625~102400[HZ]
+ [ CENTER ]              [SENSe:]FREQuency:CENTer 0.0234375~115000[HZ]
+ [ START ]               [SENSe:]FREQuency:STARt 0~115000[HZ]
+ [ STOP ]                [SENSe:]FREQuency:STOP 0.03125~115000[HZ]
+ [ ZERO START ]          [SENSe:]FREQuency:STARt 0
+ [ FULL SPAN ]           [SENSe:]FREQuency:SPAN:FULL
+ [ ENTRY STEP SIZE ]     [SENSe:]FREQuency:STEP[:INCRement] 0.015625~10240[HZ]
+ [ RECORD LENGTH ]       [SENSe:]SWEep:TIME 0.000976562~8192[S]
+ [ RESOLUTN LINES ]      [SENSe:][SENSe:]FREQuency:RESolution 100|200|400|800
+ [ 1/1 OCTAVE ]          [SENSe:]FREQuency:RESolution:OCTave FULL
+ [ 1/3 OCTAVE ]          [SENSe:]FREQuency:RESolution:OCTave THIRd
+ [ 1/12 OCTAVE ]         [SENSe:]FREQuency:RESolution:OCTave TWELth
+ [ MIN RPM ]             [SENSe:]ORDer:RPM:MINimum 0~9.9e+37
+ [ MAX RPM ]             [SENSe:]ORDer:RPM:MAXimum 0~9.9e+37
+ [ MAX ORDER ]           [SENSe:]ORDer:MAXimum 0~9.9e+37[ORD]
+ [ DELTA ORDER ]         [SENSe:]ORDer:RESolution 0.0078125~1[ORD]
+ [ TRACK ON OFF ]        [SENSe:]ORDer:TRACk:STATe OFF|0|ON|1
+ [ TRACK SETUP ]
+   [ TRACK 1 ORDER ]     [SENSe:]ORDer:TRACk1 0~9.9e+37[ORD]
+   [ TRACK 2 ORDER ]     [SENSe:]ORDer:TRACk2 0~9.9e+37[ORD]
+   [ TRACK 3 ORDER ]     [SENSe:]ORDer:TRACk3 0~9.9e+37[ORD]
+   [ TRACK 4 ORDER ]     [SENSe:]ORDer:TRACk4 0~9.9e+37[ORD]
+   [ TRACK 5 ORDER ]     [SENSe:]ORDer:TRACk5 0~9.9e+37[ORD]
+   [ TRACK POINTS ]      [SENSe:]ORDer:RESolution:TRACk 1~2048
+ [ SWEEP UP DOWN ]       [SENSe:]SWEep:DIRection UP|DOWN
+ [ SWEEP AUTO MAN ]      [SENSe:]SWEep:MODE AUTO|MANual
+ [ MANUAL FREQ ]         [SENSe:]FREQuency:MANual 0.015625~51200[HZ]
+ [ RESOLUTN SETUP ]
+   [ RESOLUTN ]          [SENSe:]FREQuency:RESolution 0.015625~51200
+                            [HZ|PCT|PNT/SWP|PNT/DEC|PNT/OCT]
+  [ SWEEP LIN LOG ]      [SENSe:]SWEep:SPACing LINear|LOGarithmic
+  [ AUTO RES ON OFF ]    [SENSe:]FREQuency:RESolution:AUTO OFF|0|ON|1
+  [ MAXIMUM % CHANGE ]   [SENSe:]FREQuency:RESolution:AUTO:MCHange 0.391~100
+  [ MINIMUM RESOLUTN ]   [SENSe:]FREQuency:RESolution:AUTO:MINimum 0.015625~51200
+                            [HZ|PCT|PNT/SWP|PNT/DEC|PNT/OCT]
+
+
+
+
+                                                                                                      B-3
+

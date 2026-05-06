@@ -1,0 +1,74 @@
+Pracujesz w lokalnym repozytorium PyMeasure.
+
+Cel: przeanalizuj Service Manual i uzupełnij `service_coverage.md` oraz kolumny ryzyka w `command_coverage.md`. Nie implementuj kodu.
+
+Pliki:
+- assets/<vendor>/<model>/service_manual.md
+- assets/<vendor>/<model>/programming_guide.md
+- assets/<vendor>/<model>/command_coverage.md
+- assets/<vendor>/<model>/service_coverage.md
+
+W `service_coverage.md` utwórz tabele:
+
+1. Safety classification
+| Area | Manual section | Operator-safe | Service-only | Hazard | Driver implication | Hardware-test implication | Notes |
+
+2. Service procedures
+| Procedure | Manual section | Requires cover removal | Requires calibration equipment | Affects calibration | Affects NVM/logs/files | Remote command known? | Related command | Policy | Notes |
+
+3. Service-related remote commands
+| Command | Form | Source in Programming Guide | Related service procedure | Risk level | PyMeasure policy | Hardware-test policy | Notes |
+
+4. Do-not-automate list
+| Item | Reason | Allowed only if | Notes |
+
+5. Safe diagnostics list
+| Item | Command | Why safe | Suggested hardware test |
+
+Następnie wróć do `command_coverage.md` i uzupełnij:
+- Risk level
+- Hardware-test policy
+- Implementation policy
+- Requires operator confirmation
+- Notes
+
+Użyj poziomów ryzyka:
+- `safe-query`
+- `safe-state-readwrite`
+- `safe-display-only`
+- `cautious-output`
+- `cautious-state-change`
+- `long-running`
+- `destructive-file`
+- `destructive-log-clear`
+- `destructive-memory`
+- `calibration`
+- `adjustment`
+- `factory/service`
+- `power-affecting`
+- `network/address-affecting`
+- `hazardous-output`
+- `service-only`
+- `unknown`
+
+Użyj polityk hardware-test:
+- `yes`
+- `query-only`
+- `roundtrip-safe`
+- `output-off-only`
+- `operator-confirmed-only`
+- `protocol-only`
+- `never`
+- `skip-unless-option-present`
+- `needs-fixture-or-load`
+- `needs-verification`
+
+Reguły:
+- Jeżeli Service Manual opisuje procedurę kalibracji, adjustment, disassembly, replacement, fuse, internal voltage, test point, cover removal: oznacz service-only.
+- Nie dodawaj nowych komend, jeśli nie występują w Programming Guide.
+- Jeżeli Programming Guide ma komendę związaną z procedurą service, oznacz ją jako related, ale nie zakładaj, że procedurę można automatyzować.
+- Komendy typu delete, format, initialize, clear log, factory reset, password, calibration save, power off, firmware update: hardware-test policy `never` albo `operator-confirmed-only`.
+
+Na końcu uruchom:
+git diff --check
+git diff --stat

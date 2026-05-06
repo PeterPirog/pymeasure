@@ -1,0 +1,61 @@
+Pracujesz w lokalnym repozytorium PyMeasure.
+
+Cel: zaimplementuj dokładnie jedną paczkę komend z `command_coverage.md`.
+
+Parametry paczki:
+- Vendor: <vendor>
+- Model: <model>
+- Class: <ClassName>
+- Batch name: <batch_name>
+- Subsystems: <subsystems>
+- Command IDs: <id_list_or_range>
+
+Pliki:
+- assets/<vendor>/<model>/command_coverage.md
+- assets/<vendor>/<model>/service_coverage.md
+- assets/<vendor>/<model>/architecture_plan.md
+- pymeasure/instruments/<vendor>/<model>.py
+- tests/instruments/<vendor>/test_<model>.py
+- tests/instruments/<vendor>/test_<model>_with_device.py
+- docs/api/instruments/<vendor>/<model>.rst
+
+Implementuj tylko komendy z podanej paczki, które mają status `todo` i nie mają risk level `unsafe`, `service-only`, `calibration`, `adjustment`, `destructive-*`, `power-affecting`, chyba że wprost podano inaczej.
+
+Dla każdej komendy:
+- command/query jako stan → `Instrument.control`
+- query-only prosta wartość → `Instrument.measurement`
+- query-only dane wielopunktowe/blokowe → metoda read/parse
+- command-only akcja → metoda
+- command-only setting bez query → `Instrument.setting`, jeśli nie jest akcją
+- indexed command → użyj istniejącej architektury Channel/Trace/Window, jeśli została zaplanowana
+- użyj walidatorów z manuala:
+  - `strict_range`
+  - `truncated_range`
+  - `strict_discrete_set`
+  - `truncated_discrete_set`
+- jeżeli tokeny urządzenia różnią się od API Pythona, użyj `values={...}` i `map_values=True`
+
+Docstringi:
+- zaczynaj czasownikiem w trybie rozkazującym
+- podaj jednostki, zakresy i typy
+- przy komendach ostrożnych dodaj informację o ryzyku
+
+Testy:
+- jeden test expected_protocol na getter
+- jeden test expected_protocol na setter, jeśli istnieje
+- test walidatora dla zakresu lub wartości dyskretnych
+- parser tests dla danych, jeśli dotyczy
+- hardware test tylko jeśli policy jest `yes`, `query-only` albo `roundtrip-safe`
+- hardware tests mają zostawić przyrząd w bezpiecznym stanie
+
+Zaktualizuj `command_coverage.md`:
+- Python API
+- Protocol test
+- Hardware test
+- Status
+- Notes
+
+Na końcu uruchom:
+python -m pytest tests/instruments/<vendor>/test_<model>.py -q
+git diff --check
+git diff --stat

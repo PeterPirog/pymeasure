@@ -1,0 +1,71 @@
+Pracujesz w lokalnym repozytorium PyMeasure.
+
+Cel: wyekstrahuj pełny indeks komend z Programming Guide do `command_coverage.md`. Nie implementuj kodu.
+
+Pliki:
+- assets/<vendor>/<model>/programming_guide.md
+- assets/<vendor>/<model>/commands.txt, jeśli istnieje
+- assets/<vendor>/<model>/command_coverage.md
+
+Zadanie:
+1. Przejdź po Programming Guide i znajdź wszystkie komendy zdalne.
+2. Dla każdej komendy utwórz albo zaktualizuj jeden wiersz w tabeli coverage.
+3. Zachowaj dokładną składnię producenta.
+4. Rozróżnij:
+   - command only
+   - query only
+   - command/query
+   - event/status query
+   - binary/data transfer
+   - macro/program/file command
+   - service/calibration/test command
+
+Wypełnij kolumny:
+- ID
+- Subsystem
+- Manual section
+- Command
+- Canonical syntax
+- Form
+- SCPI/common/custom
+- Transport:
+  - `write` dla command-only
+  - `ask` dla query-only lub command/query getter
+  - `write+read` tylko jeśli manual wymaga oddzielnego sekwencjonowania
+  - `binary read`
+  - `binary write`
+  - `multi-step`
+- Parameters
+- Return format
+- Parser needed
+- Risk level
+- Hardware-test policy
+- Status
+
+Klasyfikacja PyMeasure:
+- command/query reprezentujące stan → `Instrument.control`
+- query-only prosta wartość → `Instrument.measurement`
+- command-only akcja → metoda
+- command-only ustawienie bez query → `Instrument.setting`, tylko jeśli nie jest akcją
+- transfer danych / blok binarny / trace / waveform / screenshot / table → metoda z parserem
+- destrukcyjne / service-only → metoda jawna albo `not-implemented`, nie property
+
+Reguły:
+- Nie twórz API Python jeszcze.
+- Nie implementuj kodu.
+- Nie zgaduj zakresów ani mapowań, jeśli manual ich nie podaje.
+- Jeśli komenda ma warianty indeksowane, np. `[1|2|3|4]`, zapisz informację o indeksie i zaproponuj Channel/Trace/Window tylko w kolumnie Notes.
+- Jeśli syntax jest niepewny przez OCR, oznacz `needs-verification`.
+
+Na końcu podaj:
+- liczbę komend łącznie,
+- liczbę command-only,
+- liczbę query-only,
+- liczbę command/query,
+- liczbę data-transfer,
+- liczbę risky/unsafe,
+- liczbę needs-verification.
+
+Uruchom:
+git diff --check
+git diff --stat

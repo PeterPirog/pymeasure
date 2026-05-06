@@ -1,0 +1,1729 @@
+Chat 'ChatTitle(text="```markdown
+PROJECT…" with Junie, isCustom=true)' (f4de7a69-4887-46dd-8d99-06826829382d)
+Context:
+
+Messages: 38
+==============================================================================================================
+
+==== UserMessageImpl #1 ====
+User: 
+```markdown
+PROJECT_CONTEXT
+
+Repozytorium PyMeasure:
+REPO_ROOT = C:\Users\Ila\PycharmProjects\pymeasure
+
+Instrument:
+VENDOR = <fluke>
+MODEL = <5560A>
+MODEL_LOWER = <5560a>
+CLASS_NAME = <Fluke5560A>
+INSTRUMENT_TYPE = <multifunction precision calibrator>
+DEVICE_ADDRESS = <GPIB0::4::INSTR>
+
+Manuals:
+PROGRAMMING_GUIDE = assets/<VENDOR>/<MODEL>/programming_guide.md
+SERVICE_MANUAL = assets/<VENDOR>/<MODEL>/service_manual.md
+OPERATORS_GUIDE = assets/<VENDOR>/<MODEL>/operators_guide.md
+
+Workflow rule:
+Use these values as defaults in this workflow unless I explicitly change them.
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #2 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #3 ====
+User: 
+```markdown
+# 01 — Preflight repozytorium i materiałów
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt uruchamiasz jako pierwszy w PyCharm/Codex.
+
+Sprawdza, czy Codex pracuje w katalogu głównym repozytorium PyMeasure, czy istnieją wymagane manuale i czy katalog `assets/<vendor>/<model>/` jest gotowy.
+
+Nie tworzy drivera, nie dotyka sprzętu i nie modyfikuje plików PyMeasure poza lokalnym `codex_worklog.md`.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: verify the local PyMeasure repository and prepare the working asset directory. Do not implement a driver.
+
+Tasks:
+1. Confirm that the current working directory is the PyMeasure repository root.
+2. Confirm whether these files exist:
+   - PROGRAMMING_GUIDE
+   - SERVICE_MANUAL, if provided
+   - OPERATORS_GUIDE, if provided
+3. If PROGRAMMING_GUIDE does not exist, stop and report the missing path.
+4. Create ASSET_DIR if it does not exist.
+5. Create CODEX_WORKLOG if it does not exist.
+6. Append a new session to CODEX_WORKLOG with:
+   - date/time,
+   - vendor,
+   - model,
+   - class name,
+   - instrument type,
+   - whether DEVICE_ADDRESS is present,
+   - list of source files found.
+7. Do not use VISA.
+8. Do not communicate with real hardware.
+9. Do not modify pymeasure/instruments, tests, or docs.
+
+Run:
+git status --short
+git diff --check
+git diff --stat
+
+Report:
+- which input files exist,
+- which optional files are missing,
+- whether the workflow can continue to Prompt 02.
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #4 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #5 ====
+User: 
+```markdown
+# 02 — Ekstrakcja commands.txt
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt tworzy audytowalny plik `commands.txt` z pełnym spisem komend zdalnych.
+
+To jest najważniejszy krok przed coverage. Składnia komend ma pochodzić wyłącznie z `programming_guide.md`. `service_manual.md` może dodać tylko ogólne wskazówki ryzyka, ale nie może wprowadzać nowych komend.
+
+Nie implementuje kodu i nie dotyka sprzętu.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: create COMMANDS_TXT as an audit-friendly inventory of all remote-control commands found in PROGRAMMING_GUIDE. Do not implement a driver.
+
+Rules:
+1. Read PROGRAMMING_GUIDE.
+2. If SERVICE_MANUAL exists, use it only for general safety/risk hints. Do not extract command syntax from it.
+3. Extract commands from:
+   - command index,
+   - command summary,
+   - table of contents command entries,
+   - detailed command reference sections,
+   - common commands,
+   - subsystem command sections,
+   - appendices containing command lists.
+4. The detailed command reference has higher authority than a summary or table of contents.
+5. Preserve manufacturer notation:
+   - SCPI uppercase/lowercase notation,
+   - query marks `?`,
+   - optional nodes such as `[:STATe]`,
+   - index notation such as `[1|2|3|4]`,
+   - optional subsystem prefixes,
+   - command/query variants.
+6. Do not guess command forms.
+7. If a command form is unclear because of OCR, formatting, duplication, or conflicting text, mark it as `needs-verification`.
+
+Create COMMANDS_TXT with these sections:
+1. Metadata
+2. Source rules
+3. Interface summary
+4. Command form legend
+5. Command inventory
+
+The command inventory table must have exactly these columns:
+Subsystem | Command | Form | Short description | Source evidence | Notes
+
+Allowed Form values:
+- command only
+- query only
+- command/query
+- unknown
+- needs-verification
+
+Add these sections after the inventory:
+- Command counts
+- Counts per subsystem
+- Command groups for next workflow step
+- Parser candidates
+- Risk hints for later hardware test design
+- PyMeasure notes for next prompt
+
+Modification scope:
+- Modify only COMMANDS_TXT.
+- Do not create COMMAND_COVERAGE.
+- Do not modify driver, tests, or docs.
+- Do not use VISA.
+
+Run:
+git status --short
+git diff --check
+git diff --stat
+
+Report:
+- total unique commands,
+- command only count,
+- query only count,
+- command/query count,
+- parser candidates count,
+- risky/unsafe hints count,
+- needs-verification count.
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #6 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #7 ====
+User: 
+```markdown
+# 03 — Utworzenie command_coverage.md
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt przekształca `commands.txt` w roboczy arkusz `command_coverage.md`.
+
+Każda komenda dostaje wiersz z decyzją: forma komendy, transport, kandydat API PyMeasure, ryzyko, polityka testów i status.
+
+Jeszcze nie implementuje kodu.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: create COMMAND_COVERAGE from COMMANDS_TXT and PROGRAMMING_GUIDE. Do not implement code.
+
+Tasks:
+1. Read COMMANDS_TXT.
+2. For every command, create one row in COMMAND_COVERAGE.
+3. If COMMANDS_TXT marks a command as `needs-verification`, preserve that status.
+4. Fill details from PROGRAMMING_GUIDE only when explicitly available.
+
+COMMAND_COVERAGE must contain:
+
+1. Metadata:
+   - vendor
+   - model
+   - class name
+   - instrument type
+   - interface/protocol
+   - programming guide path
+   - service manual path
+   - operators guide path
+   - VISA address known: yes/no
+   - extraction status
+
+2. Status legend:
+   - todo
+   - implemented
+   - protocol-tested
+   - hardware-tested
+   - unsafe
+   - deferred
+   - not-implemented
+   - needs-verification
+   - needs-operator-decision
+
+3. Command coverage table:
+| ID | Subsystem | Manual section | Command | Canonical syntax | Form | SCPI/common/custom | Transport | Parameters | Return format | PyMeasure API decision | Proposed Python API | Validator / mapping | Parser needed | Risk level | Hardware-test policy | Protocol test | Hardware test | Status | Notes |
+
+Initial decisions:
+- command/query representing state -> candidate: Instrument.control
+- query-only simple value -> candidate: Instrument.measurement
+- query-only multi-point/block data -> candidate: method/parser
+- command-only action -> candidate: method
+- command-only setting without query -> candidate: Instrument.setting, if not an action
+- destructive/service/calibration/power/factory -> candidate: not-implemented or explicit method
+
+Do not invent:
+- ranges,
+- validators,
+- value mappings,
+- Python API names if not obvious.
+
+4. Implementation batches:
+   - Skeleton/Common/Status
+   - System/Error/Options
+   - Input/Channel
+   - Output/Source
+   - Trigger/Arm/Initiate
+   - Sense/Measure/Acquire
+   - Calculate/Trace/Data transfer
+   - Display/Marker/Window
+   - Memory/MMEM/File/Program
+   - Calibration/Test/Service
+   - Documentation/final cleanup
+
+Run:
+git diff --check
+git diff --stat
+
+Report:
+- total commands,
+- command only,
+- query only,
+- command/query,
+- parser candidates,
+- risky/unsafe,
+- needs-verification.
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #8 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #9 ====
+User: 
+```markdown
+# 04 — Analiza service_manual.md
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt tworzy `service_coverage.md` i przenosi ryzyka z Service Manual do `command_coverage.md`.
+
+Service Manual służy tu do bezpieczeństwa, procedur, warm-up, guard/ground, kalibracji, adjustment, sprzętu pomocniczego i decyzji, czego nie automatyzować.
+
+Nie wolno z niego wymyślać komend SCPI.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: create SERVICE_COVERAGE and transfer service risks into COMMAND_COVERAGE. Do not implement code.
+
+Tasks:
+1. Read SERVICE_MANUAL, if it exists.
+2. If SERVICE_MANUAL does not exist, create SERVICE_COVERAGE with `service manual not provided` and stop.
+3. Do not extract command syntax from SERVICE_MANUAL.
+4. Use SERVICE_MANUAL only for:
+   - safety,
+   - calibration,
+   - verification,
+   - adjustment,
+   - internal service,
+   - required equipment,
+   - warm-up,
+   - guard/ground,
+   - output safety,
+   - hazardous voltage/current/power,
+   - service-only procedures,
+   - risk classification.
+
+SERVICE_COVERAGE must contain:
+
+1. Service manual metadata
+
+2. Safety classification:
+| Area | Manual section | Operator-safe | Service-only | Hazard | Driver implication | Hardware-test implication | Notes |
+
+3. Service procedures:
+| Procedure | Manual section | Requires cover removal | Requires calibration equipment | Affects calibration | Affects NVM/logs/files | Remote command known? | Related command | Policy | Notes |
+
+4. Service-related remote commands:
+| Command | Form | Source in Programming Guide | Related service procedure | Risk level | PyMeasure policy | Hardware-test policy | Notes |
+
+5. Do-not-automate list:
+| Item | Reason | Allowed only if | Notes |
+
+6. Safe diagnostics list:
+| Item | Command | Why safe | Suggested hardware test |
+
+7. Required equipment / fixtures:
+| Function | Required equipment | Required load/fixture | Hardware-test implication | Notes |
+
+Then update COMMAND_COVERAGE columns:
+- Risk level
+- Hardware-test policy
+- Requires operator confirmation
+- Notes
+
+Risk levels:
+- safe-query
+- safe-state-readwrite
+- safe-display-only
+- cautious-output
+- cautious-state-change
+- long-running
+- destructive-file
+- destructive-log-clear
+- destructive-memory
+- calibration
+- adjustment
+- factory/service
+- power-affecting
+- network/address-affecting
+- hazardous-output
+- service-only
+- unknown
+
+Hardware-test policies:
+- yes
+- query-only
+- roundtrip-safe
+- output-off-only
+- operator-confirmed-only
+- protocol-only
+- never
+- skip-unless-option-present
+- needs-fixture-or-load
+- needs-verification
+
+Rules:
+- Calibration, adjustment, disassembly, replacement, fuse work, internal voltages, test points, cover removal -> service-only.
+- Do not add new command syntax unless it appears in PROGRAMMING_GUIDE.
+- Commands such as delete, format, initialize, clear log, factory reset, password, calibration save, power off, firmware update -> hardware-test policy `never` or `operator-confirmed-only`.
+
+Run:
+git diff --check
+git diff --stat
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #10 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #11 ====
+User: 
+```markdown
+# 05 — Analiza operators_guide.md opcjonalnie
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt jest opcjonalny. Użyj go, jeśli masz `operators_guide.md`.
+
+Operators Guide pomaga nazwać funkcje po ludzku, zrozumieć złącza, tryby pracy, bezpieczny stan końcowy i zależności opcji/modeli. Nie jest źródłem składni komend zdalnych, chyba że zawiera jawny remote command reference.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: analyze OPERATORS_GUIDE and create OPERATOR_COVERAGE. Do not implement code.
+
+Tasks:
+1. If OPERATORS_GUIDE does not exist, create a short OPERATOR_COVERAGE stating `operators guide not provided` and stop.
+2. If it exists, use it for:
+   - user-facing function names,
+   - front-panel terminology,
+   - safe operating sequence,
+   - safe standby/output-off sequence,
+   - model/option dependencies,
+   - connector names,
+   - user-level warnings,
+   - normal operating modes.
+3. Do not extract remote command syntax from OPERATORS_GUIDE unless it is explicitly a remote command reference. Otherwise treat it as a semantic and safety source only.
+
+OPERATOR_COVERAGE must contain:
+
+1. Operator manual metadata
+
+2. User-facing function map:
+| User function | Front-panel term | Remote command candidate | Programming guide confirmation | PyMeasure API implication | Notes |
+
+3. Connector and output safety:
+| Connector/output | Function | Hazard | Safe final state | Hardware-test implication | Notes |
+
+4. Normal operation sequences:
+| Sequence | Steps | Remote automation candidate | Risk | Notes |
+
+5. Model/option dependencies:
+| Feature | Models/options | Driver implication | Hardware-test implication | Notes |
+
+Update COMMAND_COVERAGE only in:
+- Proposed Python API
+- Notes
+- Hardware-test policy
+- Requires operator confirmation
+
+Do not implement code.
+
+Run:
+git diff --check
+git diff --stat
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #12 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #13 ====
+User: 
+```markdown
+# 06 — Plan architektury drivera
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt tworzy `architecture_plan.md`.
+
+Codex ma przejrzeć coverage, manuale i styl istniejących driverów w repozytorium, a następnie zaproponować architekturę klas: jedna klasa, kanały, trace/window, source/output helper itd.
+
+Nadal bez implementacji kodu.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: create ARCHITECTURE_PLAN from coverage files and existing repository style. Do not implement code.
+
+Tasks:
+1. Read:
+   - COMMAND_COVERAGE
+   - SERVICE_COVERAGE
+   - OPERATOR_COVERAGE, if present
+   - PROGRAMMING_GUIDE
+2. Inspect existing directories:
+   - pymeasure/instruments/<VENDOR>/
+   - tests/instruments/<VENDOR>/
+3. Propose an architecture consistent with PyMeasure style.
+
+ARCHITECTURE_PLAN must contain:
+
+1. Instrument classification:
+   - instrument type
+   - supported interfaces
+   - SCPI/IEEE-488.2/custom status
+   - required mixins
+   - connection defaults
+   - timeout/terminators
+
+2. Class architecture:
+Choose one or more:
+   - single Instrument class
+   - Instrument + Channel
+   - Instrument + Source/Output helper
+   - Instrument + Trace
+   - Instrument + Window
+   - ChannelCreator / MultiChannelCreator
+   - subsystem classes only if justified by existing PyMeasure style
+
+3. Inheritance:
+   - if SCPI/common commands confirmed: class <CLASS_NAME>(SCPIMixin, Instrument)
+   - never includeSCPI=True
+
+4. API mapping:
+   - command/query -> Instrument.control
+   - query-only -> Instrument.measurement or read method
+   - command-only -> method
+   - setting-only -> Instrument.setting
+   - data transfer -> parser method
+   - unsafe/service -> explicit method or not implemented
+
+5. Implementation batches:
+| Batch | Name | Command IDs | Subsystems | Risk | Protocol tests | Hardware tests | Dependencies | Notes |
+
+6. Minimal first PR scope:
+   - common/status/system,
+   - safe output-off configuration,
+   - safe query-only diagnostics,
+   - no destructive/service/calibration commands unless protocol-only.
+
+7. Unsafe/deferred list.
+
+8. Required files for PR.
+
+Do not implement code.
+
+Run:
+git diff --check
+git diff --stat
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #14 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #15 ====
+User: 
+```markdown
+# 07 — Implementacja szkieletu i Common/Status
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+To pierwszy prompt, który modyfikuje właściwe pliki PyMeasure.
+
+Tworzy klasę drivera, eksport w `__init__.py`, testy protokołowe, minimalne testy sprzętowe i dokumentację Sphinx. Zakres ma być minimalny: Common/Status/System i bezpieczne query.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: implement the first driver batch: skeleton + safe Common/Status/System query. Do not implement measurement subsystems yet.
+
+Modify:
+- DRIVER_FILE
+- VENDOR_INIT
+- PROTOCOL_TEST
+- HARDWARE_TEST
+- DOC_FILE
+- DOC_INDEX
+- COMMAND_COVERAGE
+
+Requirements:
+1. Create class CLASS_NAME.
+2. If ARCHITECTURE_PLAN confirms SCPI/IEEE-488.2:
+   class CLASS_NAME(SCPIMixin, Instrument)
+3. Never use includeSCPI=True.
+4. Do not create get_* or set_* methods.
+5. Do not duplicate standard SCPIMixin properties/methods.
+6. Add only commands from the Skeleton/Common/Status batch marked safe-query, safe-state-readwrite, or cautious-state-change.
+7. Implement reset/preset/clear only if PROGRAMMING_GUIDE confirms them.
+8. Skip hardware tests for reset/preset unless COMMAND_COVERAGE explicitly permits them.
+9. Add expected_protocol tests for every implemented command.
+10. Add hardware tests only for:
+    - identity query,
+    - safe query-only,
+    - error queue query, if available.
+11. Hardware tests must be skipped when DEVICE_ADDRESS is empty.
+
+After implementation, update COMMAND_COVERAGE:
+- Proposed Python API
+- Protocol test
+- Hardware test
+- Status
+- Notes
+
+Run:
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+git diff --check
+git diff --stat
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #16 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #17 ====
+User: 
+```markdown
+# 08 — Hardware smoke test z adresem VISA
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt używa sprzętu po raz pierwszy.
+
+Ma uruchomić minimalne, bezpieczne testy z adresem VISA: identyfikacja, safe query-only i kolejka błędów. Nie wolno jeszcze włączać wyjść ani robić kalibracji, adjustment, store/delete, power-off, long self-test.
+
+Adres VISA może być znany od początku workflow, ale używany jest dopiero tutaj.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: run a minimal safe hardware smoke test for the existing driver skeleton.
+
+Condition:
+- If DEVICE_ADDRESS is empty, do not run hardware tests. Report that hardware tests were skipped.
+- If DEVICE_ADDRESS is not empty, use it only for safe-query tests.
+
+Tasks:
+1. Run protocol tests.
+2. Run hardware tests with DEVICE_ADDRESS.
+3. Use timeout >= 20000 ms for older GPIB/VISA unless the manual requires more.
+4. Do not send:
+   - output enable,
+   - operate,
+   - calibration,
+   - adjustment,
+   - save/store,
+   - delete/format,
+   - firmware,
+   - factory,
+   - power off/reboot,
+   - long self-test.
+5. Verify instrument identity.
+6. Verify safe query-only properties.
+7. Query the error queue if the driver supports it.
+8. Update CODEX_WORKLOG:
+   - command run,
+   - output,
+   - IDN response if available,
+   - error queue response,
+   - final safety state.
+
+Run:
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>_with_device.py --device-address "<DEVICE_ADDRESS>" -q -s
+git diff --check
+git diff --stat
+
+If the hardware test reveals firmware/model/option differences, do not guess. Mark COMMAND_COVERAGE as needs-verification and document the real response.
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #18 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #19 ====
+User: 
+zapamiętaj adres visa fluke 5560A i uzywaj go od teraz we wszystkich testach GPIB0::4::INSTR
+
+kotlin.Unit
+
+==== AgentMessage #20 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #21 ====
+User: 
+```markdown
+# 08 — Hardware smoke test z adresem VISA
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt używa sprzętu po raz pierwszy.
+
+Ma uruchomić minimalne, bezpieczne testy z adresem VISA: identyfikacja, safe query-only i kolejka błędów. Nie wolno jeszcze włączać wyjść ani robić kalibracji, adjustment, store/delete, power-off, long self-test.
+
+Adres VISA może być znany od początku workflow, ale używany jest dopiero tutaj.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: run a minimal safe hardware smoke test for the existing driver skeleton.
+
+Condition:
+- If DEVICE_ADDRESS is empty, do not run hardware tests. Report that hardware tests were skipped.
+- If DEVICE_ADDRESS is not empty, use it only for safe-query tests.
+
+Tasks:
+1. Run protocol tests.
+2. Run hardware tests with DEVICE_ADDRESS.
+3. Use timeout >= 20000 ms for older GPIB/VISA unless the manual requires more.
+4. Do not send:
+   - output enable,
+   - operate,
+   - calibration,
+   - adjustment,
+   - save/store,
+   - delete/format,
+   - firmware,
+   - factory,
+   - power off/reboot,
+   - long self-test.
+5. Verify instrument identity.
+6. Verify safe query-only properties.
+7. Query the error queue if the driver supports it.
+8. Update CODEX_WORKLOG:
+   - command run,
+   - output,
+   - IDN response if available,
+   - error queue response,
+   - final safety state.
+
+Run:
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>_with_device.py --device-address "<DEVICE_ADDRESS>" -q -s
+git diff --check
+git diff --stat
+
+If the hardware test reveals firmware/model/option differences, do not guess. Mark COMMAND_COVERAGE as needs-verification and document the real response.
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #22 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #23 ====
+User: 
+```markdown
+# 09 — Implementacja jednej bezpiecznej paczki subsystemu
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt powtarzasz wiele razy — osobno dla każdej paczki komend z `architecture_plan.md`.
+
+Wypełniasz `BATCH_NAME`, `COMMAND_IDS` i `SUBSYSTEMS`. Codex implementuje tylko tę paczkę, testuje protokół i aktualizuje coverage.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: implement exactly one command batch from COMMAND_COVERAGE.
+
+Batch parameters:
+BATCH_NAME = <batch name>
+COMMAND_IDS = <IDs or range>
+SUBSYSTEMS = <subsystems>
+
+Rules:
+1. Implement only commands from COMMAND_IDS.
+2. Implement only status `todo`, or `needs-verification` after manual confirmation in PROGRAMMING_GUIDE.
+3. Do not implement commands with risk level:
+   - calibration
+   - adjustment
+   - destructive-file
+   - destructive-log-clear
+   - destructive-memory
+   - factory/service
+   - power-affecting
+   - hazardous-output
+   - service-only
+   unless this prompt explicitly permits it.
+4. For command/query as state, use Instrument.control.
+5. For query-only simple value, use Instrument.measurement.
+6. For command-only action, use a method.
+7. For setting-only, use Instrument.setting if it is not an action.
+8. For manufacturer tokens, use values={...}, map_values=True.
+9. Use validators only with ranges/sets explicitly documented in the manual.
+10. Do not use properties for block/data commands; use parser methods.
+11. Every command must have an expected_protocol test.
+12. Add hardware tests only for policies:
+    - yes
+    - query-only
+    - roundtrip-safe
+    - output-off-only
+13. Hardware tests must leave the instrument in a safe final state.
+
+Update:
+- DRIVER_FILE
+- PROTOCOL_TEST
+- HARDWARE_TEST, if applicable
+- DOC_FILE, if public API is added
+- COMMAND_COVERAGE
+
+Run:
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+git diff --check
+git diff --stat
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #24 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #25 ====
+User: 
+```markdown
+# 10 — Implementacja parserów i transferów danych
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt jest dla komend zwracających tablice, bloki binarne, waveform, trace, raporty, listy plików lub złożone odpowiedzi.
+
+Takich komend nie implementujemy jako proste `Instrument.measurement/control`, tylko jako jawne metody parsera z testami edge cases.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: implement only data-transfer/parser commands from COMMAND_COVERAGE.
+
+Parameters:
+COMMAND_IDS = <parser command IDs>
+
+Rules:
+1. Do not implement data transfers as Instrument.measurement/control if they return:
+   - arrays,
+   - binary blocks,
+   - waveform data,
+   - trace data,
+   - reports,
+   - complex strings,
+   - file lists,
+   - calibration reports.
+2. Create explicit methods:
+   - read_<thing>()
+   - fetch_<thing>()
+   - parse_<thing>()
+   following repository style.
+3. If data format depends on another command, document the dependency.
+4. Add separate parser tests:
+   - ASCII,
+   - empty response,
+   - malformed response,
+   - binary block, if applicable.
+5. Hardware tests only for query-only commands and only when no external fixture is required.
+6. Do not fetch large data blocks in automatic hardware smoke tests if this can be slow.
+
+Update COMMAND_COVERAGE:
+- Parser needed = yes
+- Python API
+- Protocol test
+- Hardware policy
+- Status
+
+Run:
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+git diff --check
+git diff --stat
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #26 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #27 ====
+User: 
+```markdown
+# 11 — Komendy ryzykowne: implementować, odroczyć albo tylko protocol-only
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt obsługuje komendy ryzykowne: kalibracja, adjustment, zapis NVM, format/delete, firmware, power off, factory, long self-test, hazardous output.
+
+Nie chodzi o masową implementację. Codex ma zdecydować, które metody mają sens jako jawne API, a które trzeba oznaczyć jako deferred/not-implemented.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: analyze risky commands and decide which should enter public API as explicit conscious methods and which should remain deferred/not-implemented.
+
+Scope:
+- calibration
+- adjustment
+- correction factors
+- save/store nonvolatile memory
+- delete/format/initialize
+- factory/service password
+- firmware update
+- power off/reboot
+- network/GPIB address changes
+- long self-tests
+- hazardous output enable
+
+Rules:
+1. Do not implement risky commands as normal properties.
+2. If implemented, use an explicit method name that shows the effect.
+3. The docstring must state:
+   - what the command does,
+   - whether it is destructive,
+   - whether it changes NVM/calibration/configuration,
+   - that it is not run in automatic hardware tests.
+4. Add expected_protocol tests only.
+5. Do not call these methods in HARDWARE_TEST.
+6. If a command is too dangerous or requires a service procedure, mark it:
+   - deferred
+   - not-implemented
+   - needs-operator-decision
+7. Update SERVICE_COVERAGE and COMMAND_COVERAGE.
+
+Run:
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+git diff --check
+git diff --stat
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #28 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #29 ====
+User: 
+```markdown
+# 12 — Dokumentacja Sphinx i przykłady bezpiecznego użycia
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt uzupełnia dokumentację Sphinx dla drivera.
+
+Dokumentacja ma pokazywać bezpieczne użycie, ostrzegać przed ryzykownymi komendami i nie wciągać lokalnych plików `assets/` ani manuali PDF do PR.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: complete Sphinx documentation for the driver.
+
+Modify:
+- DOC_FILE
+- DOC_INDEX
+- DRIVER_FILE only if docstrings require correction
+- COMMAND_COVERAGE only for documentation status
+
+Documentation must include:
+1. Short instrument description.
+2. Supported interfaces.
+3. Safe output/final-state warning.
+4. Connection example.
+5. Safe query example.
+6. Safe parameter-setting example with output disabled, if applicable.
+7. Risky/service-related commands section, if such methods exist.
+8. Statement that destructive/calibration/service commands are not run in automatic hardware tests.
+9. Autodoc class entry following repository style.
+
+Do not add:
+- manual PDFs,
+- assets,
+- local workflow notes,
+- worklogs.
+
+Run:
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+git diff --check
+git diff --stat
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #30 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #31 ====
+User: 
+```markdown
+# 13 — Audyt kompletności względem manuali
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ten prompt wykonuje audyt: czy każda komenda z Programming Guide ma decyzję w coverage, czy każda implementacja ma test, czy ryzykowne komendy nie są uruchamiane sprzętowo i czy Service/Operators Manual nie wprowadziły niepotwierdzonych komend.
+
+To etap przed pełniejszym hardware regression.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: audit implementation completeness against PROGRAMMING_GUIDE, SERVICE_MANUAL, and OPERATORS_GUIDE.
+
+Check:
+1. Every command in COMMANDS_TXT has a row in COMMAND_COVERAGE.
+2. Every command in COMMAND_COVERAGE has:
+   - Form
+   - Transport
+   - PyMeasure API decision
+   - Risk level
+   - Hardware-test policy
+   - Status
+3. Every implemented command has an expected_protocol test.
+4. Every hardware-tested command has a safe hardware-test policy.
+5. Query-only commands are not setters.
+6. Command-only actions are not Instrument.control.
+7. Data/block commands have parsers or are deferred.
+8. SERVICE_MANUAL did not introduce unconfirmed command syntax.
+9. OPERATORS_GUIDE did not introduce unconfirmed command syntax.
+10. Destructive/service/calibration/power/factory commands are not run in hardware tests.
+11. No includeSCPI=True.
+12. No get_* / set_* methods.
+13. Docstrings start with an imperative verb.
+14. Validators and mappings come from the manual.
+15. Safe final state is defined.
+
+Add Final summary to COMMAND_COVERAGE:
+- total commands
+- implemented
+- protocol-tested
+- hardware-tested
+- unsafe
+- deferred
+- not-implemented
+- needs-verification
+- needs-operator-decision
+
+Run:
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+git diff --check
+git diff --stat
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #32 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #33 ====
+User: 
+```markdown
+14A_SAFE_HARDWARE_COVERAGE.md
+DLA CZŁOWIEKA — co robi ten prompt
+Ten prompt wymusza pełne pokrycie testami sprzętowymi dla wszystkich komend, które:
+są już zaimplementowane w driverze,
+mają test `expected_protocol`,
+są oznaczone jako bezpieczne do sprawdzenia na realnym urządzeniu,
+nie wymagają specjalnego fixture, obciążenia, kalibratora pomocniczego, DUT ani świadomego potwierdzenia operatora.
+Prompt nie uruchamia komend niebezpiecznych. Dla każdej komendy bez testu sprzętowego Codex ma dopisać test albo jawnie oznaczyć powód pominięcia w `command_coverage.md`.
+Użyj tego promptu dopiero po implementacji głównych bezpiecznych subsystemów i po przejściu testów protokołowych. Ten prompt najlepiej wykonać po audycie kompletności, a przed finalnym hardware regression i final cleanup.
+Jak podać kontekst projektu, żeby Chat i Codex miały stałe dane
+Przed użyciem tego promptu wypełnij blok `SOURCE DATA FOR CODEX`. Najważniejsze pola:
+```text
+VENDOR = <vendor>
+MODEL = <model>
+MODEL_LOWER = <model_lower>
+CLASS_NAME = <ClassName>
+DEVICE_ADDRESS = <VISA address or empty string>
+```
+Przykład:
+```text
+VENDOR = fluke
+MODEL = 5560A
+MODEL_LOWER = 5560a
+CLASS_NAME = Fluke5560A
+DEVICE_ADDRESS = GPIB0::4::INSTR
+```
+Jeżeli nie chcesz jeszcze wykonywać testów na fizycznym urządzeniu, ustaw:
+```text
+DEVICE_ADDRESS =
+```
+Wtedy Codex ma przygotować testy sprzętowe, ale ich nie uruchamiać.
+---
+PROMPT DLA CODEXA
+SOURCE DATA FOR CODEX
+Work in the local PyMeasure repository.
+Instrument parameters:
+```text
+VENDOR = <vendor>
+MODEL = <model>
+MODEL_LOWER = <model_lower>
+CLASS_NAME = <ClassName>
+DEVICE_ADDRESS = <VISA address or empty string>
+```
+Paths:
+```text
+COMMAND_COVERAGE = assets/<VENDOR>/<MODEL>/command_coverage.md
+SERVICE_COVERAGE = assets/<VENDOR>/<MODEL>/service_coverage.md
+OPERATOR_COVERAGE = assets/<VENDOR>/<MODEL>/operator_coverage.md
+DRIVER_FILE = pymeasure/instruments/<VENDOR>/<MODEL_LOWER>.py
+PROTOCOL_TEST = tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py
+HARDWARE_TEST = tests/instruments/<VENDOR>/test_<MODEL_LOWER>_with_device.py
+CODEX_WORKLOG = assets/<VENDOR>/<MODEL>/codex_worklog.md
+```
+Global PyMeasure rules:
+Do not invent commands.
+Command syntax must come only from `programming_guide.md`, `commands.txt`, or another explicit remote programming command reference.
+`service_manual.md` may only affect risk, safety, calibration, adjustment, hardware-test policy, and service-only classification.
+`operators_guide.md` may only affect user-facing semantics, safe operating sequence, connector terminology, and final safe state.
+Use `SCPIMixin, Instrument` for SCPI/IEEE-488.2 instruments.
+Never use `includeSCPI=True`.
+Do not create `get_*` or `set_*` methods.
+Use `Instrument.measurement`, `Instrument.control`, and `Instrument.setting`.
+Use explicit methods for command-only actions, destructive operations, long operations, and data-transfer parsers.
+Every implemented command must have an `expected_protocol` test.
+Hardware tests must be skipped when `DEVICE_ADDRESS` is empty.
+Never run destructive, calibration, adjustment, format, delete, store, power-off, firmware, factory, or long self-test commands in automatic hardware tests.
+After hardware tests, leave the instrument in a safe state and query the error queue if available.
+---
+MAIN GOAL
+Create or update hardware tests so that every implemented safe command has one of these outcomes:
+`hardware-tested`
+`hardware-skipped-with-reason`
+`operator-confirmed-only`
+`protocol-only`
+`never`
+Do not leave any implemented safe command with an empty or vague hardware-test decision.
+This prompt is a hardware coverage enforcement step. It is not a feature implementation prompt unless a missing hardware test requires a small helper or restoration method that is clearly safe and already supported by the driver.
+---
+DEFINITIONS
+Hardware-test eligible command
+A command is hardware-test eligible if all are true:
+Status is `implemented` or `protocol-tested`.
+Risk level is one of:
+`safe-query`
+`safe-state-readwrite`
+`safe-display-only`
+`cautious-state-change`
+Hardware-test policy is one of:
+`yes`
+`query-only`
+`roundtrip-safe`
+`output-off-only`
+It does not require:
+external load,
+DUT,
+fixture,
+calibration standard,
+service access,
+high voltage,
+high current,
+high power,
+RF load,
+destructive memory operation,
+option not present,
+operator confirmation.
+Not hardware-test eligible command
+A command is not hardware-test eligible if any are true:
+Risk level is one of:
+`calibration`
+`adjustment`
+`destructive-file`
+`destructive-log-clear`
+`destructive-memory`
+`factory/service`
+`power-affecting`
+`network/address-affecting`
+`hazardous-output`
+`service-only`
+`unknown`
+Hardware-test policy is one of:
+`operator-confirmed-only`
+`protocol-only`
+`never`
+`skip-unless-option-present`
+`needs-fixture-or-load`
+`needs-verification`
+The command:
+enables output,
+switches the instrument to operate,
+changes calibration data,
+saves to nonvolatile memory,
+deletes data,
+formats media,
+changes communication address,
+powers off or reboots the unit,
+starts a long self-test,
+requires a connected load or DUT.
+---
+TASKS
+Read `COMMAND_COVERAGE`.
+Read `SERVICE_COVERAGE` if it exists.
+Read `OPERATOR_COVERAGE` if it exists.
+Read `DRIVER_FILE`.
+Read `PROTOCOL_TEST`.
+Read `HARDWARE_TEST` if it exists.
+Build a list of all commands with status `implemented` or `protocol-tested`.
+For each command, determine whether it is hardware-test eligible.
+Update `HARDWARE_TEST` so that every hardware-test eligible command has a real test.
+For every command that is not hardware-test eligible, do not add a hardware test; instead update `COMMAND_COVERAGE` with a precise reason.
+Update `CODEX_WORKLOG` with a hardware coverage session entry.
+Run protocol tests.
+Run hardware tests only if `DEVICE_ADDRESS` is not empty.
+Report hardware coverage numbers and unresolved exceptions.
+---
+HARDWARE TEST DESIGN RULES
+General rules
+Tests must skip if `DEVICE_ADDRESS` is empty.
+Tests must use the repository convention for connected hardware tests.
+Tests must accept `--device-address "<DEVICE_ADDRESS>"` if this is the local convention.
+Use `timeout >= 20000 ms` unless the manual requires a longer timeout.
+Open the real instrument only inside hardware tests.
+Do not use `expected_protocol` in hardware tests.
+Do not run broad hardware tests through mocks.
+Do not mark a command as `hardware-tested` unless an actual hardware test exists and passes on the real instrument.
+Remote-state proof
+Add one explicit smoke test that sends a real identity query to the instrument.
+The smoke test must:
+Open the instrument using `DEVICE_ADDRESS`.
+Send a real identity query, usually `*IDN?` or the driver’s equivalent identity property.
+Print or log the actual identity response when pytest is run with `-s`.
+Query the error queue if the driver supports it.
+Record the actual identity response in `CODEX_WORKLOG`.
+Do not consider hardware tests executed unless at least one real query response from the device is captured.
+Safe query-only commands
+For query-only commands:
+Test by reading the property or method.
+Assert only:
+type,
+non-empty response,
+parseability,
+documented token set,
+numeric range if the manual clearly defines it.
+Do not over-constrain firmware-specific strings unless the manual requires it.
+If the real device response differs from the documentation, mark the row as `needs-verification` and record the actual response in `CODEX_WORKLOG`.
+Safe command/query controls
+For safe read/write controls, prefer non-destructive roundtrip:
+Query the original value.
+Set a documented safe value.
+Query and assert the safe value.
+Restore the original value.
+Query and assert restoration if feasible.
+Query the error queue if available.
+If restore cannot be guaranteed, do not hardware-test automatically. Mark the command as:
+```text
+hardware-skipped-with-reason: restore cannot be guaranteed
+```
+Output/source commands
+For output/source commands:
+Do not enable output unless explicitly marked `roundtrip-safe` and low-risk.
+For source/output settings, test only with output disabled or standby.
+Before test: force safe standby/output-off state if the driver provides it.
+After test: force safe standby/output-off state if the driver provides it.
+If output state cannot be controlled safely, mark `operator-confirmed-only`.
+Never test hazardous voltage, current, power, RF, or energy output automatically.
+Display commands
+For display-only state changes:
+They may be hardware-tested if they do not affect output, NVM, calibration, files, or communication settings.
+Save original display state when a query exists.
+Restore original display state after test.
+If original state cannot be queried, test only if the display state is harmless and clearly reversible.
+Parser/data commands
+For parser or data-transfer commands:
+Hardware-test only small, bounded, query-only reads.
+Do not request large traces, screenshots, full memory dumps, calibration reports, or long transfers unless explicitly marked safe.
+If data transfer requires prior measurement, external signal, DUT, trigger, fixture, or long acquisition, mark `needs-fixture-or-load` or `operator-confirmed-only`.
+Keep robust parser tests in `expected_protocol` tests.
+Error queue handling
+If the instrument has an error queue method:
+Query it at the end of each hardware test or test group.
+Normalize known no-error formats according to the driver parser.
+Do not fail on harmless no-error format differences.
+If an unexpected error appears, fail the test and record it in `CODEX_WORKLOG`.
+Safe final state
+At the end of each hardware test or test group:
+Put the instrument into standby/output-off state if the driver supports it.
+Disable source/output if applicable.
+Restore changed settings if possible.
+Query error queue if available.
+Never leave the instrument sourcing energy unless the test explicitly requires it and the operator confirmed it outside this prompt.
+---
+COMMAND_COVERAGE UPDATES
+For each implemented command, update these fields:
+```text
+Hardware test:
+- yes
+- skipped: <reason>
+- operator-confirmed-only
+- protocol-only
+- never
+```
+```text
+Status:
+- hardware-tested only after an actual hardware test exists and passes
+- protocol-tested if only expected_protocol exists
+- unsafe if not safe
+- needs-verification if device response differs from documentation
+- needs-operator-decision if safe automation cannot be decided from manuals
+```
+Add this section to `COMMAND_COVERAGE`:
+```markdown
+## Hardware coverage summary
+
+| Category | Count |
+|---|---:|
+| Implemented commands | |
+| Hardware eligible commands | |
+| Hardware tests implemented | |
+| Hardware skipped with reason | |
+| Operator-confirmed only | |
+| Protocol-only | |
+| Never hardware test | |
+| Needs verification | |
+```
+Add this section to `COMMAND_COVERAGE`:
+```markdown
+## Hardware coverage exceptions
+
+| Command | Reason not hardware-tested | Required operator action | Notes |
+|---|---|---|---|
+```
+No implemented safe command may have an empty hardware-test field after this prompt.
+---
+HARDWARE TEST FILE REQUIREMENTS
+Update or create:
+```text
+tests/instruments/<VENDOR>/test_<MODEL_LOWER>_with_device.py
+```
+The file must:
+Use the repository’s existing convention for connected-device tests.
+Skip all tests if no device address is provided.
+Use timeout at least 20000 ms unless the manual requires more.
+Include a smoke identity test.
+Include hardware tests for every eligible safe implemented command.
+Never call dangerous commands automatically.
+Restore safe final state whenever possible.
+Avoid brittle assertions based on exact firmware strings unless the manual or driver requires them.
+Print or otherwise expose identity response under `pytest -s` for operator verification.
+Recommended structure:
+```python
+import pytest
+
+from pymeasure.instruments.<VENDOR> import <CLASS_NAME>
+
+
+def make_instrument(address):
+    return <CLASS_NAME>(address, timeout=20000)
+
+
+def test_hardware_identity(connected_device_address):
+    inst = make_instrument(connected_device_address)
+    identity = inst.id
+    print(f"Instrument identity: {identity}")
+    assert identity
+    assert "<MODEL>".upper() in identity.upper() or "<VENDOR>".upper() in identity.upper()
+```
+Adapt this structure to the repository’s actual fixtures and style. Do not duplicate fixtures if the repository already provides them.
+---
+CODEX_WORKLOG UPDATES
+Append a new session to `CODEX_WORKLOG`:
+```markdown
+### Session — SAFE_HARDWARE_COVERAGE
+
+#### Goal
+
+Enforce hardware-test coverage for all implemented safe commands.
+
+#### DEVICE_ADDRESS present
+
+yes/no
+
+#### Commands considered
+
+<paste count and list or summary>
+
+#### Commands hardware-tested
+
+<paste list>
+
+#### Commands skipped with reason
+
+<paste list>
+
+#### Commands not eligible for automatic hardware tests
+
+<paste list>
+
+#### Commands run
+
+```powershell
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>_with_device.py --device-address "<DEVICE_ADDRESS>" -q -s
+```
+Test output
+```text
+<paste full output>
+```
+Actual instrument identity response
+```text
+<paste response or "not run">
+```
+Error queue response
+```text
+<paste response or "not available">
+```
+Final safe state
+```text
+Output/source disabled: yes/no/not applicable
+Instrument left in standby: yes/no/not applicable
+Unexpected errors: yes/no
+```
+Notes for architect
+```text
+<paste issues, skipped commands, operator decisions needed>
+```
+```
+
+---
+
+## ACCEPTANCE COMMANDS
+
+Run protocol tests:
+
+```powershell
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+```
+If `DEVICE_ADDRESS` is not empty, run hardware tests:
+```powershell
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>_with_device.py --device-address "<DEVICE_ADDRESS>" -q -s
+```
+Then run:
+```powershell
+git diff --check
+git diff --stat
+git status --short
+```
+If `DEVICE_ADDRESS` is empty, do not run hardware tests. Instead report:
+```text
+Hardware tests were prepared but not run because DEVICE_ADDRESS is empty.
+```
+---
+FINAL REPORT
+At the end, report:
+Whether hardware tests actually ran.
+The actual identity response from the device, if hardware tests ran.
+Number of implemented commands.
+Number of hardware-eligible commands.
+Number of commands now hardware-tested.
+Number of commands skipped with reason.
+Number of `operator-confirmed-only` commands.
+Number of `protocol-only` commands.
+Number of `never` hardware-test commands.
+Any unexpected instrument errors.
+Whether the instrument was left in a safe state.
+Whether `COMMAND_COVERAGE` has no empty hardware-test decisions for implemented commands.
+The output of:
+`git diff --check`
+`git diff --stat`
+`git status --short`
+Do not claim hardware coverage if the hardware tests did not run against a real `DEVICE_ADDRESS`.
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #34 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #35 ====
+User: 
+```markdown
+# 15 — Final cleanup przed PR
+
+## DLA CZŁOWIEKA — co robi ten prompt
+
+Ostatni prompt przed PR.
+
+Codex ma sprawdzić wyłącznie pliki, które powinny wejść do upstream PyMeasure, uruchomić testy i wypisać, co wchodzi do PR, a co nie. `assets/`, `AGENTS.md`, manuale i worklogi nie powinny wejść do finalnego diffu.
+
+## PROMPT DO CODEXA
+
+Przed tym promptem wklej uzupełniony blok `SOURCE DATA FOR CODEX` z pliku `00_PROJECT_CONTEXT_TEMPLATE.md`.
+
+```text
+Goal: perform final cleanup before pull request.
+
+Check and fix:
+- DRIVER_FILE
+- VENDOR_INIT
+- PROTOCOL_TEST
+- HARDWARE_TEST
+- DOC_FILE
+- DOC_INDEX
+
+Checklist:
+1. Class imports from pymeasure.instruments.<VENDOR>.
+2. If the instrument is SCPI, class inherits from SCPIMixin, Instrument.
+3. No includeSCPI=True.
+4. No get_* and no set_* methods.
+5. Properties use Instrument.measurement/control/setting.
+6. Methods are only for actions, data transfers, parsers, and multi-step operations.
+7. Every property has a docstring with units/types/ranges if known.
+8. Every validator uses manual data.
+9. Every values={...} mapping uses manual tokens.
+10. expected_protocol tests are complete for implemented commands.
+11. Hardware tests skip without a device address.
+12. Hardware tests do not run destructive/service/power/calibration commands.
+13. Hardware tests leave sources/outputs disabled if applicable.
+14. Sphinx documentation exists.
+15. Vendor index is updated.
+16. assets/, AGENTS.md, manual PDFs, logs, worklogs, coverage files do not enter final PR.
+
+Run:
+python -m pytest tests/instruments/<VENDOR>/test_<MODEL_LOWER>.py -q
+git diff --check
+git diff --stat
+git status --short
+
+Report:
+- files that should enter the PR,
+- files that should not enter the PR,
+- deferred/not-implemented commands and reasons,
+- whether the driver is ready for review.
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #36 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
+==== UserMessageImpl #37 ====
+User: 
+```markdown
+# 16 — Operator report template
+
+## DLA CZŁOWIEKA
+
+Po każdym uruchomieniu promptu wklej taki raport do Chata/Architekta. Dzięki temu następny prompt można zawęzić do realnego stanu repozytorium i sprzętu.
+
+```text
+PROMPT RUN:
+<file name / prompt number>
+
+REPO:
+<branch>
+<git status --short>
+
+TESTS:
+<pytest output>
+
+DIFF:
+<git diff --check output>
+<git diff --stat output>
+
+COVERAGE CHANGES:
+<fragment command_coverage.md / service_coverage.md>
+
+HARDWARE, jeśli dotyczy:
+DEVICE_ADDRESS:
+<IDN response>
+<error queue response>
+<final safety state>
+
+PROBLEMS:
+<first traceback or unexpected response>
+
+QUESTION FOR ARCHITECT:
+<what should be decided next>
+```
+```
+
+
+kotlin.Unit
+
+==== AgentMessage #38 ====
+Assistant: 
+
+
+Tool use list:
+
+
+kotlin.Unit
+
