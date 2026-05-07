@@ -1,0 +1,21 @@
+{
+  "vendor": "fluke",
+  "model": "5560A",
+  "class_name": "Fluke5560A",
+  "instrument_type": "multifunction precision calibrator / precision source calibrator",
+  "pymeasure_vendor_package": "fluke",
+  "model_lower": "5560a",
+  "visa_address_example": "GPIB0::4::INSTR",
+  "asset_dir": "assets/fluke/5560A",
+  "manuals": {
+    "programming_guide": "assets/fluke/5560A/programming_guide.md",
+    "operator_manual_candidates": [
+      "assets/fluke/5560A/operators_manual.md",
+      "assets/fluke/5560A/operators_guide.md",
+      "assets/fluke/5560A/operation_manual.md",
+      "assets/fluke/5560A/manual.md"
+    ],
+    "service_manual": "assets/fluke/5560A/service_manual.md"
+  },
+  "workflow_reports_dir": "assets/fluke/5560A/workflow_reports"
+}
