@@ -1,6 +1,6 @@
-# Prompt 04 - Optimize Service Manual for LLM and PyMeasure service-risk planning
+# Prompt 04 - Create LLM-optimized Service Manual risk artifact for PyMeasure
 
-Version: v5 - execution-first, config-driven, source-readonly, prompt-maintenance-aware
+Version: v8 - output-required, no-provisional-report-first, dictionary-validated
 
 WORK IN THE LOCAL PYMEASURE REPOSITORY.
 
@@ -8,11 +8,14 @@ EXECUTION MODE REQUIRED.
 Apply file changes directly. Do not only describe steps. Do not only return snippets.
 
 IMPORTANT:
-Do not reformat this prompt. Do not escape underscores. Do not modify source manuals.
+Do not reformat this prompt.
+Do not escape underscores.
+Do not modify source manuals.
 
 CONFIG_FILE = assets/workflow_prompts/workflow_config.json
 
-Read CONFIG_FILE. It is the only source of vendor/model/path information.
+Read CONFIG_FILE and use it as the only source of paths and metadata.
+
 Use:
 - config.vendor
 - config.model
@@ -25,74 +28,82 @@ Use:
 - config.workflow_reports_dir
 
 Derived paths:
-SERVICE_MANUAL = config.manuals.service_manual
-PROGRAMMING_GUIDE = config.manuals.programming_guide
-OUTPUT_FILE = config.asset_dir + "/service_manual_llm.md"
-REPORT_FILE = config.workflow_reports_dir + "/04_optimize_service_manual_for_llm_report.md"
-PROMPT_FILE = assets/workflow_prompts/prompts/04_optimize_service_manual_for_llm_prompt.md
+- SERVICE_MANUAL = config.manuals.service_manual
+- PROGRAMMING_GUIDE = config.manuals.programming_guide
+- OUTPUT_FILE = config.asset_dir + "/service_manual_llm.md"
+- REPORT_FILE = config.workflow_reports_dir + "/04_optimize_service_manual_for_llm_report.md"
+- PROMPT_FILE = assets/workflow_prompts/prompts/04_optimize_service_manual_for_llm_prompt.md
 
-Allowed changed paths for this step:
+Allowed changed paths:
 - OUTPUT_FILE
 - REPORT_FILE
-- PROMPT_FILE only when it was intentionally updated by the operator before running this step
-
-PROMPT_FILE policy:
-If PROMPT_FILE is modified, do not fail only because of that.
-Record it as:
-PROMPT_MAINTENANCE: present, non-blocking
-This is acceptable only if no source manual, driver file, test file, docs file, commands.txt, or
-command_coverage.md changed.
+- PROMPT_FILE only if it was intentionally updated before this run
 
 Read-only source manuals:
 - SERVICE_MANUAL
 - PROGRAMMING_GUIDE
-- all config.manuals.operator_manual_candidates
+- every path in config.manuals.operator_manual_candidates
 
-If any source manual changes, STATUS must be FAIL.
+Forbidden changes:
+- source manuals
+- pymeasure/instruments/
+- tests/
+- docs/
+- commands.txt
+- command_coverage.md
 
 Physical instrument access required: NO.
 Do not use VISA or real hardware.
-Do not modify pymeasure/instruments/, tests/, docs/, commands.txt, or command_coverage.md.
 
-Recommended model:
-- hal/qwen3-coder-next:cloud for execution
-- hal/kimi-k2.6:cloud for long-context reading if needed
+Recommended execution model:
+- hal/qwen3-coder-next:cloud
+
+CRITICAL EXECUTION RULE
+
+Do not create REPORT_FILE first.
+The first generated artifact must be OUTPUT_FILE.
+If SERVICE_MANUAL exists, create OUTPUT_FILE before writing REPORT_FILE.
+Never leave only REPORT_FILE without OUTPUT_FILE.
 
 MANDATORY EXECUTION ORDER
 
 1. Read CONFIG_FILE.
-2. Create config.workflow_reports_dir if missing.
-3. Immediately create provisional REPORT_FILE with:
-   STATUS: FAIL
-   HUMAN_REQUIRED: yes
-   STEP_ID: 04
-   STEP_NAME: optimize_service_manual_for_llm
-   BLOCKERS: provisional report created, final report not written yet
-4. Confirm SERVICE_MANUAL exists.
-5. If SERVICE_MANUAL is missing:
+2. Confirm SERVICE_MANUAL exists.
+3. If SERVICE_MANUAL is missing:
+   - create REPORT_FILE with STATUS: FAIL
    - do not create OUTPUT_FILE
-   - overwrite REPORT_FILE with STATUS: FAIL and HUMAN_REQUIRED: yes
-   - explain missing service manual
    - stop
-6. Immediately create OUTPUT_FILE with all required top-level headings before doing detailed extraction.
-7. Fill OUTPUT_FILE from SERVICE_MANUAL.
-8. Run acceptance checks.
-9. Overwrite REPORT_FILE with final PASS or FAIL.
-10. Do not stop after the provisional report.
-11. Final report must never contain "generation in progress".
+4. Create OUTPUT_FILE immediately.
+5. Fill OUTPUT_FILE by transforming SERVICE_MANUAL into a service-risk artifact.
+6. Use PROGRAMMING_GUIDE only to confirm command-like tokens if available.
+7. Run acceptance checks.
+8. Create or overwrite REPORT_FILE with final PASS or FAIL.
+9. Final report must not contain "provisional", "pending", or "generation in progress".
 
 PRIMARY GOAL
 
 Create service_manual_llm.md as an LLM/PyMeasure service-risk knowledge base.
 
-It is not command inventory. It is not driver code.
-It is used to mark service-only, calibration-risk, NVM-risk, destructive, persistent-state,
-long-running, covers-open, qualified-service-only, and fixture-dependent topics before later driver
-implementation.
+It is not command inventory.
+It is not driver code.
 
-Use the Service Manual for service-risk classification only.
-Use the Programming Guide only to confirm command-like tokens if available.
-Do not infer command syntax from the Service Manual.
+Use it to classify:
+- service-only procedures
+- calibration-risk procedures
+- adjustment procedures
+- NVM / persistent-state risks
+- passcode/security risks
+- destructive operations
+- long-running operations
+- covers-open/internal-access procedures
+- qualified-service-only procedures
+- fixture-dependent verification procedures
+- model and option dependencies
+- command-like tokens requiring Programming Guide confirmation
+
+Do not infer remote command syntax from the Service Manual.
+Do not treat service procedures as operator-safe.
+Do not implement driver code.
 
 OUTPUT_FILE REQUIRED STRUCTURE
 
@@ -150,7 +161,7 @@ Allowed hardware-test policies:
 query-only, output-off-only, roundtrip-safe, operator-confirmed-only, protocol-only, never,
 needs-verification
 
-Required table formats:
+REQUIRED TABLES
 
 SERVICE SAFETY SUMMARY:
 | Topic | Risk value | Risk description | PyMeasure implication | Hardware-test policy | Source evidence |
@@ -180,8 +191,14 @@ COMMAND-LIKE TOKENS REQUIRING PROGRAMMING GUIDE CONFIRMATION:
 | Token | Service manual context | Found in Programming Guide? | Decision | Notes |
 
 Allowed Decision values:
-confirmed-by-programming-guide, not-found-in-programming-guide, programming-guide-missing,
-needs-verification
+- confirmed-by-programming-guide
+- not-found-in-programming-guide
+- programming-guide-missing
+- needs-verification
+
+Do not use any other Decision value.
+Do not write misspellings such as needs-veribration.
+If any Decision value is outside the allowed set, set STATUS: FAIL.
 
 HARDWARE-TEST EXCLUSION LIST:
 | Excluded topic | Reason for exclusion | Scope | Suggested safer alternative | Source evidence |
@@ -189,10 +206,9 @@ HARDWARE-TEST EXCLUSION LIST:
 PYMEASURE API DECISION RULES must include:
 - Service procedures must not become normal public driver APIs unless explicitly designed and approved.
 - Calibration, adjustment, NVM, firmware, passcode, destructive, and service-only actions should normally be omitted, protocol-only, private, or operator-confirmed-only.
-- Query-only service/status info may be exposed only if Programming Guide confirms syntax.
+- Query-only service/status information may be exposed only if Programming Guide confirms syntax.
 - Hardware tests must skip without VISA address.
 - Hardware tests must not run service/calibration/destructive commands automatically.
-- Hardware tests must leave instrument in safe final state and query documented error queue.
 - Use Programming Guide for validators, values, ranges, command/query forms, and responses.
 - Do not use includeSCPI=True.
 - Do not create public get_* or set_* methods.
@@ -207,11 +223,30 @@ DO-NOT-INFER LIST must include:
 - Do not treat command-like service tokens as implemented API.
 - Do not treat service verification as PyMeasure hardware test coverage.
 
+OCR_AND_CONVERSION_NOTES must be conservative:
+- Mention OCR or conversion ambiguity if visible.
+- Do not claim OCR is perfect.
+- Do not use service-manual numeric tolerances as driver validators without Programming Guide confirmation.
+
 STEP 05 HANDOFF CHECKLIST must state:
 - Step 05 must use Programming Guide, not Service Manual, for complete command inventory.
 - Step 05 may use this file only for risk hints, exclusion rules, and command-like token cross-references.
 - Calibration, NVM, destructive, and service-only items must be restrictive in command coverage.
 - Service-only and calibration-risk commands must not be implemented in early batches.
+
+MINIMUM CONTENT REQUIREMENTS FOR PASS
+
+OUTPUT_FILE must contain extracted content, not only headings.
+
+Minimum acceptable counts:
+- at least 5 rows in SERVICE SAFETY SUMMARY
+- at least 3 rows in SERVICE-ONLY PROCEDURES
+- at least 3 rows in CALIBRATION / ADJUSTMENT / NVM RISK
+- at least 3 rows in VERIFICATION PREREQUISITES
+- at least 3 rows in HARDWARE-TEST EXCLUSION LIST
+- at least 3 command-like tokens or explicit statement that none were found
+
+If any minimum count is not met, still create OUTPUT_FILE, but set STATUS: FAIL.
 
 FORBIDDEN OUTPUT MEANINGS
 
@@ -239,6 +274,7 @@ ACCEPTANCE_RESULTS:
 COUNTS:
 NEEDS_VERIFICATION_ITEMS:
 COMMAND_LIKE_TOKEN_CHECK:
+DECISION_VALUE_CHECK:
 SERVICE_ONLY_CLASSIFICATION_CHECK:
 CALIBRATION_NVM_RISK_CHECK:
 HARDWARE_TEST_EXCLUSION_CHECK:
@@ -252,7 +288,6 @@ PYMEASURE_AGENTS_COMPLIANCE:
 BLOCKERS:
 NEXT_RECOMMENDED_STEP:
 
-HUMAN_REQUIRED policy:
 Use HUMAN_REQUIRED: no if files exist, no blockers remain, source files are unchanged, and unresolved
 items are deferred to Step 05 or later human-approved hardware planning.
 Use HUMAN_REQUIRED: yes only if the operator must act before Step 05.
@@ -265,13 +300,15 @@ STATUS must be FAIL if:
 - SERVICE_MANUAL is missing
 - OUTPUT_FILE is missing
 - REPORT_FILE is missing
-- final report still says generation in progress
+- final report says provisional, pending, or generation in progress
+- OUTPUT_FILE is only a skeleton with no extracted service-risk rows
+- minimum content requirements are not met
 - files outside allowed scope changed, except PROMPT_FILE under PROMPT_MAINTENANCE policy
 - any source manual changed
-- source-file hash changed
-- any file under pymeasure/instruments/, tests/, or docs/ changed
-- commands.txt or command_coverage.md changed
+- any file under pymeasure/instruments/, tests/, docs/, commands.txt, or command_coverage.md changed
 - command-like tokens are treated as command inventory
+- any Decision value in COMMAND-LIKE TOKENS table is outside the allowed set
+- any misspelled Decision value such as needs-veribration appears
 - service/calibration/NVM/destructive actions are not excluded from normal hardware tests
 - output claims service/calibration/destructive actions are safe automatically
 - report says output was merely copied
@@ -307,7 +344,8 @@ Get-Content $report -TotalCount 180
 
 Select-String -Path $output -Pattern "LLM_AGENT_CONTRACT","SERVICE SAFETY SUMMARY","SERVICE-ONLY PROCEDURES","CALIBRATION / ADJUSTMENT / NVM RISK","VERIFICATION PREREQUISITES","HARDWARE-TEST EXCLUSION LIST","STEP 05 HANDOFF CHECKLIST"
 Select-String -Path $output -Pattern "service-only","calibration-risk","persistent-state","destructive","never","protocol-only","Programming Guide confirmation"
-Select-String -Path $report -Pattern "generation in progress","Copied service_manual.md to service_manual_llm.md","HUMAN_REQUIRED: yes","Needs-verification items: 0","NEEDS_VERIFICATION_ITEMS:\s*None"
+Select-String -Path $report -Pattern "provisional","pending","generation in progress","Copied service_manual.md to service_manual_llm.md","HUMAN_REQUIRED: yes","Needs-verification items: 0","NEEDS_VERIFICATION_ITEMS:\\s*None"
+Select-String -Path $output,$report -Pattern "needs-veribration"
 
 $changed = @()
 $changed += git diff --name-only
@@ -323,9 +361,7 @@ if ($config.manuals.service_manual) { $sourceFiles += $config.manuals.service_ma
 foreach ($candidate in $config.manuals.operator_manual_candidates) { $sourceFiles += $candidate }
 $sourceFiles = $sourceFiles | Select-Object -Unique
 
-$forbiddenProjectAreas = @("pymeasure/instruments/","tests/","docs/")
 $unexpected = $changed | Where-Object { $allowed -notcontains $_ }
-
 if ($unexpected) {
     Write-Output "UNEXPECTED_CHANGED_PATHS:"
     $unexpected
@@ -366,16 +402,7 @@ Write-Output ("GIT_DIFF_CHECK_EXIT_CODE: {0}" -f $diffCheckExitCode)
 git diff --stat
 POWERSHELL_ACCEPTANCE_END
 
-Important interpretation:
-- Test-Path $output must be True.
-- Test-Path $report must be True.
-- UNEXPECTED_CHANGED_PATHS may include only PROMPT_FILE, OUTPUT_FILE, and REPORT_FILE.
-- SOURCE_MANUALS_CHANGED must not appear.
-- FORBIDDEN_PROJECT_FILES_CHANGED must not appear.
-- PROMPT_MAINTENANCE_PRESENT is non-blocking if only PROMPT_FILE is listed outside artifacts.
-- If final report has PASS, HUMAN_REQUIRED no, source integrity PASS, and blockers None, Step 04 passes.
-
 FINAL CHAT RESPONSE:
 Report input file, output file, report file, service-only topics, calibration/NVM risks,
 hardware-test exclusions, source integrity, prompt maintenance status, allowed path check,
-git diff --check exit code, git diff --stat, STATUS, and HUMAN_REQUIRED.
+decision value check, git diff --check exit code, git diff --stat, STATUS, and HUMAN_REQUIRED.
