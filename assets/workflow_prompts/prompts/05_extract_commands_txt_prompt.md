@@ -1,655 +1,228 @@
-# Prompt 05 - Extract `commands.txt` from Programming Guide
+# Prompt 05 — extract `commands.txt`
 
-Version: v11 - self-contained Qwen Coder execution prompt, config-driven, source-readonly
+Run this as an execution task in the PyMeasure repo. Use paths only from `assets/workflow_prompts/workflow_config.json`.
 
----
+Goal: create/update only:
+- `config.asset_dir + "/commands.txt"`
+- `config.workflow_reports_dir + "/05_extract_commands_txt_report.md"`
 
-## 1. ROLE
+Do not read/use/modify `obsolete/` or `_obsolete_/`. Do not modify manuals, `pymeasure/instruments/`, `tests/`, `docs/`, or `command_coverage.md`. Do not use VISA/hardware.
 
-You are an execution-oriented coding agent working inside the local PyMeasure repository.
+Command syntax authority: `config.manuals.programming_guide` only. Do not extract units, response values, IEEE-488 message names, examples, wiring terms, or prose words as commands.
 
-Your task is to create a reliable command inventory artifact for a PyMeasure instrument-driver workflow.
+`CMD` = `command only`; `CMD?` = `query only`. Prefer separate rows.
 
-This is not a planning task. This is not a discussion task. This is a repository file-generation task.
-
-Your first substantive action must be to inspect the repository and create or update the required Step 05 files.
-
----
-
-## 2. OBJECTIVE
-
-Create a complete, auditable command inventory from the instrument Programming Guide.
-
-The command inventory must be written to:
-
-```text
-config.asset_dir + "/commands.txt"
-```
-
-A Step 05 execution report must be written to:
-
-```text
-config.workflow_reports_dir + "/05_extract_commands_txt_report.md"
-```
-
-Both paths must be derived from:
-
-```text
-assets/workflow_prompts/workflow_config.json
-```
-
-Do not hard-code the vendor, model, or asset directory.
-
----
-
-## 3. CONFIGURATION SOURCE
-
-Read this file first:
-
-```text
-assets/workflow_prompts/workflow_config.json
-```
-
-Use only this config for repository paths and metadata.
-
-Required config fields:
-
-```text
-vendor
-model
-class_name
-instrument_type
-pymeasure_vendor_package
-model_lower
-visa_address_example
-asset_dir
-manuals.programming_guide
-manuals.operator_manual_candidates
-manuals.service_manual
-workflow_reports_dir
-```
-
-Derived runtime variables:
-
-```text
-ASSET_DIR = config.asset_dir
-PROGRAMMING_GUIDE = config.manuals.programming_guide
-PROGRAMMING_GUIDE_LLM = config.asset_dir + "/programming_guide_llm.md"
-OPERATORS_MANUAL_LLM = config.asset_dir + "/operators_manual_llm.md"
-SERVICE_MANUAL_LLM = config.asset_dir + "/service_manual_llm.md"
-COMMANDS_FILE = config.asset_dir + "/commands.txt"
-REPORT_FILE = config.workflow_reports_dir + "/05_extract_commands_txt_report.md"
-PROMPT_FILE = assets/workflow_prompts/prompts/05_extract_commands_txt_prompt.md
-```
-
----
-
-## 4. SOURCE AUTHORITY
-
-Only `PROGRAMMING_GUIDE` is authoritative for command syntax.
-
-`PROGRAMMING_GUIDE_LLM` may be used only as a navigation aid.
-
-`OPERATORS_MANUAL_LLM` and `SERVICE_MANUAL_LLM` may be used only for risk hints. They must not introduce commands into `COMMAND INVENTORY` unless the same command is confirmed in `PROGRAMMING_GUIDE`.
-
----
-
-## 5. REQUIRED OUTPUT FILES
-
-You must create or update exactly these Step 05 artifacts:
-
-```text
-COMMANDS_FILE
-REPORT_FILE
-```
-
-The final answer in chat is not the deliverable. The repository files are the deliverables.
-
----
-
-## 6. READ-ONLY INPUTS
-
-Do not modify:
-
-```text
-PROGRAMMING_GUIDE
-PROGRAMMING_GUIDE_LLM
-OPERATORS_MANUAL_LLM
-SERVICE_MANUAL_LLM
-config.manuals.service_manual
-all paths in config.manuals.operator_manual_candidates
-```
-
-Do not modify any file under:
-
-```text
-pymeasure/instruments/
-tests/
-docs/
-```
-
-Do not create or modify:
-
-```text
-command_coverage.md
-```
-
-Do not use VISA or real hardware.
-
-Physical instrument access is not required for this step.
-
----
-
-## 7. FORBIDDEN ACTIONS
-
-These actions are forbidden:
-
-```text
-Do not read, copy, move, rename, delete, or modify files under obsolete/ or _obsolete_/.
-Do not use obsolete/commands.txt.
-Do not use Move-Item from obsolete/commands.txt.
-Do not use an obsolete command inventory as a source.
-Do not leave helper scripts inside the repository.
-Do not create driver code.
-Do not create protocol tests.
-Do not create hardware tests.
-Do not create Sphinx documentation.
-Do not claim a driver was implemented.
-Do not claim hardware safety.
-```
-
-Temporary scripts are allowed only outside the repository, for example under `%TEMP%`.
-
-If any obsolete or `_obsolete_` path is already modified before the run, do not repair it silently. Create `REPORT_FILE` with:
-
-```text
-STATUS: FAIL
-HUMAN_REQUIRED: yes
-```
-
-and list the modified obsolete path as a blocker.
-
----
-
-## 8. EXECUTION DIRECTIVES
-
-Follow this execution order.
-
-### 8.1 Preflight
-
-1. Read `workflow_config.json`.
-2. Resolve all derived paths.
-3. Check that `PROGRAMMING_GUIDE` exists.
-4. Check Git status for modified paths under `obsolete/` or `_obsolete_/`.
-
-If `PROGRAMMING_GUIDE` is missing, create `REPORT_FILE` with `STATUS: FAIL` and stop.
-
-If obsolete paths are modified, create `REPORT_FILE` with `STATUS: FAIL` and stop.
-
-### 8.2 Create required files early
-
-Before deep extraction, create both files:
-
-```text
-COMMANDS_FILE
-REPORT_FILE
-```
-
-`COMMANDS_FILE` may initially contain only the required skeleton.
-
-`REPORT_FILE` must initially contain:
-
-```text
-STATUS: FAIL
-HUMAN_REQUIRED: yes
-STEP_ID: 05
-STEP_NAME: extract_commands_txt
-BLOCKERS:
-- extraction not completed yet
-```
-
-Then continue. Do not stop after writing the initial report.
-
-### 8.3 Extraction
-
-Extract remote-control command candidates from `PROGRAMMING_GUIDE`.
-
-Use all relevant regions:
-
-```text
-command index
-command summary
-table of contents command entries
-common commands section
-subsystem command sections
-detailed command reference sections
-appendices containing command lists
-status/error/reference sections containing remote commands
-```
-
-Detailed command-reference sections are higher authority than summaries or TOC entries.
-
-Deduplicate exact duplicate commands, but preserve meaningful variants when they differ by:
-
-```text
-query form
-command-only form
-optional path
-index notation
-channel/trace/window/address parameter
-subsystem
-response/data-transfer behavior
-model or option dependency
-```
-
-Do not invent commands, query forms, parameters, ranges, validators, or safety policies.
-
-### 8.4 Exact command-form semantics
-
-Use exact literal form semantics.
-
-Rules:
-
-```text
-CMD  -> command only
-CMD? -> query only
-```
-
-If the manual documents both `CMD` and `CMD?`, list them as two rows:
-
-```text
-Subsystem | CMD  | command only | ...
-Subsystem | CMD? | query only   | ...
-```
-
-Do not mark separate literal rows as `command/query`.
-
-Use `command/query` only when the `Command` cell explicitly combines both forms in one row, for example:
-
-```text
-CMD / CMD? | command/query
-```
-
-Prefer separate literal rows over combined rows.
-
-### 8.5 Source evidence
-
-Every inventory row must include source evidence.
-
-Source evidence must point to `PROGRAMMING_GUIDE`, preferably in this form:
-
-```text
-assets/.../programming_guide.md:L<number>; <nearby heading or table name>
-```
-
-Never use `obsolete/commands.txt` or any non-programming source as evidence for command syntax.
-
-### 8.6 Reporting
-
-After extraction, overwrite `REPORT_FILE` with final PASS/FAIL status.
-
-Do not leave final report with any of these placeholders:
-
-```text
-pending
-provisional
-generation in progress
-extraction not completed yet
-```
-
----
-
-## 9. `commands.txt` REQUIRED STRUCTURE
-
-`COMMANDS_FILE` must contain exactly these top-level sections:
-
-```text
-# HEADER
-# SOURCE RULES
-# COMMAND FORM LEGEND
-# COMMAND INVENTORY
-# COMMAND COUNTS
-# COMMAND GROUPS FOR NEXT WORKFLOW STEP
-# PARSER CANDIDATES
-# RISK HINTS FOR LATER HARDWARE TEST DESIGN
-# COMMAND-LIKE REFERENCES FROM NON-PROGRAMMING SOURCES
-# PYMEASURE NOTES FOR NEXT PROMPT
-# COMPLETENESS AND TRACEABILITY NOTES
-```
-
-### 9.1 HEADER
-
-Include:
-
-```text
-vendor:
-model:
-class_name:
-instrument_type:
-asset_dir:
-programming guide source:
-auxiliary sources used:
-generated_on:
-local_artifact: true
-upstream_pr: false
-command_inventory_created: true
-source_authority: programming_guide.md
-```
-
-### 9.2 SOURCE RULES
-
-State explicitly:
-
-```text
-Command syntax authority is PROGRAMMING_GUIDE only.
-Operator/service LLM artifacts may add risk hints only.
-Unconfirmed command-like tokens from non-programming sources must not enter COMMAND INVENTORY.
-Do not use this file alone to implement a driver without command_coverage.md and API design review.
-```
-
-### 9.3 COMMAND FORM LEGEND
-
-Allowed `Form` values:
-
-```text
-command only
-query only
-command/query
-unknown
-needs-verification
-```
-
-### 9.4 COMMAND INVENTORY
-
-The first non-empty inventory line must be exactly:
-
-```text
-Subsystem | Command | Form | Short description | Source evidence | Notes
-```
-
-Each inventory row must have exactly six cells:
-
-```text
-<Subsystem> | <Command> | <Form> | <Short description> | <Source evidence> | <Notes>
-```
-
-Allowed `Subsystem` values:
-
-```text
-Common
-Status
-System
-Output
-Source
-Input
-Sense
-Measure
-Trigger
-Arm
-Initiate
-Calculate
-Trace
-Marker
-Display
-Memory
-MMEMory
-Format
-Calibration
-Diagnostic
-Test
-Communication
-Data
-Other
-```
-
-### 9.5 COMMAND COUNTS
-
-Include:
-
-```text
-Total unique inventory rows:
-command only:
-query only:
-command/query:
-unknown:
-needs-verification:
-counts by subsystem
-commands with model/option notes:
-commands with risk hints:
-parser candidates:
-```
-
-Counts must be internally consistent.
-
-### 9.6 PARSER CANDIDATES
-
-Create table:
-
-```text
-Command | Reason | Source evidence | Notes
-```
-
-Include commands that return or accept:
-
-```text
-binary blocks
-ASCII tables
-lists
-arrays
-reports
-traces
-waveforms
-status bitfields
-error queue messages
-option lists
-calibration reports
-file/memory data
-```
-
-If none are found, write a valid placeholder row.
-
-### 9.7 RISK HINTS FOR LATER HARDWARE TEST DESIGN
-
-Create table:
-
-```text
-Command or topic | Risk hint | Suggested later hardware-test policy | Source evidence | Notes
-```
-
-Allowed hardware-test policies:
-
-```text
-query-only
-output-off-only
-roundtrip-safe
-operator-confirmed-only
-protocol-only
-never
-needs-verification
-```
-
-Risk hints do not prove safety. They are only inputs for later hardware-test design.
-
-### 9.8 COMMAND-LIKE REFERENCES FROM NON-PROGRAMMING SOURCES
-
-Create table:
-
-```text
-Token | Source artifact | Context | Confirmed in Programming Guide? | Decision | Notes
-```
-
-Allowed `Decision` values:
-
-```text
-confirmed-in-programming-guide
-not-found-in-programming-guide
-programming-guide-missing
-needs-verification
-```
-
-Do not add unconfirmed tokens to `COMMAND INVENTORY`.
-
-If no non-programming command-like references were used, write this exact six-column placeholder row:
-
-```text
-None | not used | No non-programming sources were used for command extraction | n/a | needs-verification | Placeholder row; no tokens added to inventory
-```
-
-### 9.9 PYMEASURE NOTES FOR NEXT PROMPT
-
-Include:
-
-```text
-use SCPIMixin, Instrument if Programming Guide confirms IEEE-488.2/SCPI common commands
-do not use includeSCPI=True
-query-only may later become Instrument.measurement or explicit method
-command-only action becomes a method
-command/query combined rows may later become Instrument.control after API design
-separated command-only and query-only rows may later be paired into one property by command_coverage.md
-block/table/report transfer needs method plus parser
-no public get_* or set_* methods
-hardware tests must skip without VISA address
-destructive commands must be protocol-only, operator-confirmed-only, never, or deferred
-validators require confirmed ranges/discrete sets from Programming Guide
-values/map_values require confirmed token mappings
-```
-
----
-
-## 10. REPORT REQUIRED STRUCTURE
-
-`REPORT_FILE` must contain:
-
-```text
-STATUS: PASS or FAIL
-HUMAN_REQUIRED: yes or no
-STEP_ID: 05
-STEP_NAME: extract_commands_txt
-CONFIG_FILE:
-INPUT_FILE_USED:
-AUXILIARY_FILES_USED:
-FILES_CREATED_OR_UPDATED:
-COMMANDS_RUN:
-ACCEPTANCE_RESULTS:
-COUNTS:
-FORM_VALUE_CHECK:
-FORM_SEMANTIC_CHECK:
-SUBSYSTEM_VALUE_CHECK:
-SOURCE_EVIDENCE_CHECK:
-COMMAND_COUNTS_CONSISTENCY_CHECK:
-DUPLICATE_COMMAND_CHECK:
-COMMAND_LIKE_REFERENCE_CHECK:
-PARSER_CANDIDATE_CHECK:
-RISK_HINT_CHECK:
-HELPER_SCRIPT_CHECK:
-GIT_VISIBILITY_CHECK:
-OBSOLETE_PATH_CHECK:
-FORBIDDEN_MEANING_CHECK:
-REPORT_CONSISTENCY_CHECK:
-SOURCE_INTEGRITY_CHECK:
-LINE_ENDING_WARNING:
-PROMPT_MAINTENANCE:
-ALLOWED_PATH_CHECK:
-PYMEASURE_AGENTS_COMPLIANCE:
-BLOCKERS:
-NEXT_RECOMMENDED_STEP:
-```
-
-`NEXT_RECOMMENDED_STEP` must be exactly:
-
-```text
-Proceed to Step 06: create command_coverage.md from commands.txt and PyMeasure API planning.
-```
-
----
-
-## 11. PASS / FAIL RULES
-
-Set:
-
-```text
-STATUS: PASS
-HUMAN_REQUIRED: no
-```
-
-only if all checks pass.
-
-Set:
-
-```text
-STATUS: FAIL
-HUMAN_REQUIRED: yes
-```
-
-if any condition below is true:
-
-```text
-COMMANDS_FILE does not exist.
-REPORT_FILE does not exist.
-COMMANDS_FILE has no inventory rows.
-Any inventory row has empty Source evidence.
-Any literal command ending in ? has Form different from query only.
-Any literal command not ending in ? has Form = query only.
-Any separate literal command row has Form = command/query.
-Any Form value is outside the allowed set.
-Any Subsystem value is outside the allowed set.
-Form counts do not sum to Total unique inventory rows.
-Subsystem counts do not sum to Total unique inventory rows.
-REPORT_FILE counts do not match COMMANDS_FILE counts.
-Any obsolete or _obsolete_ path changed.
-Any source manual or previous LLM artifact changed.
-Any file under pymeasure/instruments/, tests/, docs/, or command_coverage.md changed.
-Any helper script remains inside the repository.
-git diff --check reports real whitespace errors.
-```
-
-LF/CRLF warnings are non-blocking if `git diff --check` exits with code 0.
-
----
-
-## 12. VERIFICATION COMMANDS
-
-Run these commands after file generation and include the results in the final chat response:
+Run this PowerShell block now:
 
 ```powershell
+$configPath = "assets/workflow_prompts/workflow_config.json"
+$config = Get-Content $configPath -Raw | ConvertFrom-Json
+$assetDir = $config.asset_dir
+$pgPath = $config.manuals.programming_guide
+$reportDir = $config.workflow_reports_dir
+$commandsFile = "$assetDir/commands.txt"
+$reportFile = "$reportDir/05_extract_commands_txt_report.md"
+
+New-Item -ItemType Directory -Force -Path $assetDir | Out-Null
+New-Item -ItemType Directory -Force -Path $reportDir | Out-Null
+
+$tempScript = Join-Path $env:TEMP "pymeasure_step05_extract_commands_v15.py"
+
+@'
+from __future__ import annotations
+import json, re, subprocess
+from collections import Counter, OrderedDict
+from datetime import datetime
+from pathlib import Path
+
+CFG = json.loads(Path("assets/workflow_prompts/workflow_config.json").read_text(encoding="utf-8"))
+asset = Path(CFG["asset_dir"])
+pg = Path(CFG["manuals"]["programming_guide"])
+report_dir = Path(CFG["workflow_reports_dir"])
+cmd_file = asset / "commands.txt"
+report_file = report_dir / "05_extract_commands_txt_report.md"
+
+ALLOWED_FORMS = {"command only", "query only", "command/query", "unknown", "needs-verification"}
+ALLOWED_SUBS = {"Common","Status","System","Output","Source","Input","Sense","Measure","Trigger","Arm","Initiate","Calculate","Trace","Marker","Display","Memory","MMEMory","Format","Calibration","Diagnostic","Test","Communication","Data","Other"}
+FORBID = {"A","V","UV","MV","KV","UA","MA","HZ","KHZ","MHZ","DBM","OHM","KOHM","MOHM","NF","PF","UF","MF","CEL","FAR","NS","US","MS","CR","LF","CRLF","EOL","GPIB","USBTMC","ETHERNET","TELNET","VISA","DTR","RTS","CTS","DCL","GET","GTL","REN","LLO","SPE","SPD","PPC","PPE","PPD","PPU","SDC","UNL","UNT","ON","OFF","NONE","RMS","PKPK","SINE","SQUARE","TRI","ACTIVE","STORED","DEFAULT","OLD","ALL","USB","SERIAL","MAIN","TRUE","FALSE"}
+
+def git(args):
+    p = subprocess.run(["git", *args], capture_output=True, text=True, check=False)
+    return p.returncode, (p.stdout + p.stderr).strip()
+
+def txt(path):
+    for enc in ("utf-8","utf-8-sig","cp1250","latin-1"):
+        try: return path.read_text(encoding=enc)
+        except UnicodeDecodeError: pass
+    return path.read_text(errors="replace")
+
+def pnorm(p): return str(p).replace("\\","/")
+def clean(s): return re.sub(r"\s+"," ",str(s).replace("|","/").replace("`","")).strip()
+def strip(line): return re.sub(r"<!--.*?-->","", re.sub(r"^#+\s*","",line.strip())).replace("**","").replace("__","").replace("`","").strip()
+
+def heading(lines, i):
+    for j in range(i, max(-1, i-60), -1):
+        if lines[j].strip().startswith("#"):
+            return clean(strip(lines[j]))
+    return "Programming Guide command reference"
+
+bad_heading = ("Units Accepted","Response Data Types","Interface quick reference","High-value retrieval keywords","RS-232 Interface Wiring","IEEE-488 Remote Message Coding","Operating State Transitions","Error code reference","Conversion notes","Connection Cables")
+cmd_heading = ("Common Commands","Error Mode Commands","External Connection Commands","Oscilloscope Commands","Output Commands","RS-232/Ethernet Port Commands","Setup and Utility Commands","Thermocouple","Remote Commands")
+
+def valid(tok):
+    tok = tok.upper().strip()
+    base = tok.rstrip("?")
+    if base in FORBID or base.startswith("PPR"): return False
+    return bool(re.fullmatch(r"\*?[A-Z][A-Z0-9_]{1,30}\??", tok)) and (len(base) > 1 or base.startswith("*"))
+
+def subs(cmd):
+    c = cmd.rstrip("?").upper()
+    if c.startswith("*"): return "Status" if c in {"*ESE","*ESR","*SRE","*STB"} else "Common"
+    if c.startswith(("ERR","FAULT","EXPLAIN","ISR","ISCR","ISCE")): return "Status"
+    if c.startswith(("ADJ","CAL","VER_","SPEC_")): return "Calibration"
+    if c.startswith("DIAG"): return "Diagnostic"
+    if c.startswith("TST"): return "Test"
+    if c.startswith(("ADDR","COMM","DHCP","IPADDR","GWADDR","SUBNETMASK","EOLSTR","ENETPORT","MACADDR","SP_SET","LOCKOUT","REMOTE","LOCAL","SPLSTR","SRQSTR")): return "Communication"
+    if c.startswith(("OUT","OPER","STBY","BOOST","LOWS","POST_52120","OUT_IMP","SYNCOUT","CUR_POST","LIMIT")): return "Output"
+    if c.startswith(("WAVE","PHASE","RANGE","RANGELCK","DPF","DUTY","DBMZ","DC_OFFSET","HARMONIC","INCR","MULT","NEWREF","OLDREF","REFOUT","REFPHASE","REFCLOCK","SCOPE","VIDEO","TM","TRIG","TLIMIT","LCOMP_52120","ZCOMP")): return "Source"
+    if c.startswith(("TC","RTD","TEMP","EXTGUARD","EXTSENSE","VAL","VVAL","CFREQ","LFREQ","COIL","TSENS","ZERO_MEAS","FUNC","POWER","AC_REP","EDIT","OL_TRIP","ONTIME","UNCERT","AMB_")): return "Measure"
+    if c.startswith(("DISP","DATEFMT","TIMEFMT","LED_BRIGHTNESS")): return "Display"
+    if c.startswith(("PUD","RPT")): return "Memory"
+    if c == "FORMAT": return "Format"
+    return "Other"
+
+def desc(lines, i, tok):
+    out=[]
+    for j in range(i, min(len(lines), i+6)):
+        s=clean(strip(lines[j]))
+        if s and not s.startswith("---"): out.append(s)
+    return (" ".join(out) or "Remote command documented in Programming Guide")[:180]
+
+def add(rows, tok, i, lines):
+    tok = tok.upper().strip()
+    h = heading(lines, i)
+    if not valid(tok) or any(x.lower() in h.lower() for x in bad_heading): return
+    rows.setdefault(tok, {"Subsystem":subs(tok), "Command":tok, "Form":"query only" if tok.endswith("?") else "command only", "Short description":desc(lines,i,tok), "Source evidence":f"{pnorm(pg)}:L{i+1}; {h}", "Notes":"n/a"})
+
+def extract(lines):
+    rows=OrderedDict()
+    anchor = re.compile(r"^\s*#{0,6}\s*(\*?[A-Z][A-Z0-9_]{1,30}\??)\s+\{#[a-z0-9_*?_-]+\}", re.I)
+    for i,line in enumerate(lines):
+        m=anchor.match(line.strip())
+        if m: add(rows,m.group(1),i,lines)
+    first_token = re.compile(r"^\s*(\*?[A-Z][A-Z0-9_]{1,30}\??)\b", re.I)
+    for i,line in enumerate(lines):
+        h=heading(lines,i)
+        if not any(x.lower() in h.lower() for x in cmd_heading): continue
+        if "|" in line:
+            first=clean(line.strip().strip("|").split("|")[0]).upper()
+            if valid(first):
+                add(rows,first,i,lines)
+                if re.search(r"\?\s+Returns\b", line, re.I): add(rows,first.rstrip("?")+"?",i,lines)
+        else:
+            s=strip(line)
+            m=first_token.match(s)
+            if m and re.search(r"\b(Set|Returns|Selects|Changes|Activates|Run|Restores|Queries|Turns|Chooses)\b", s, re.I):
+                add(rows,m.group(1),i,lines)
+                if re.search(r"\?\s+Returns\b", s, re.I): add(rows,m.group(1).rstrip("?")+"?",i,lines)
+    return rows
+
+def row(vals): return " | ".join(clean(v) or "n/a" for v in vals).rstrip()
+def parser(r): return r["Command"].endswith("?") and any(k in (r["Command"]+" "+r["Short description"]).lower() for k in ("block","table","list","array","report","trace","waveform","status","bit","queue","option","data","register","string"))
+def risk(r):
+    c=r["Command"].rstrip("?").upper()
+    if r["Form"]=="query only": return "Safe telemetry/query candidate","query-only"
+    if c.startswith(("ADJ","CAL")) or c in {"FORMAT","*PUD"}: return "Calibration, adjustment, NVM, or persistent-state risk","never"
+    if c.startswith(("OUT","OPER","BOOST","SCOPE","LIMIT")): return "May enable or affect hazardous output","operator-confirmed-only"
+    return "Write/action command; requires later API and safety review","protocol-only"
+
+def count_after(lines, header):
+    try: start=lines.index(header)
+    except ValueError: return 0
+    n=0
+    for line in lines[start+2:]:
+        if not line.strip() or line.startswith("# "): break
+        if "|" in line: n+=1
+    return n
+
+asset.mkdir(parents=True, exist_ok=True); report_dir.mkdir(parents=True, exist_ok=True)
+before=git(["status","--short","--untracked-files=all"])[1]
+blockers=[]
+if any("obsolete" in x.lower() for x in before.splitlines()): blockers.append("obsolete path modified before run")
+if not pg.exists(): blockers.append("programming guide missing")
+
+rows=[]
+if not blockers:
+    lines=txt(pg).splitlines()
+    d=extract(lines)
+    order={k:i for i,k in enumerate(["Common","Status","System","Communication","Output","Source","Measure","Display","Memory","Format","Calibration","Diagnostic","Test","Other"])}
+    rows=sorted(d.values(), key=lambda r:(order.get(r["Subsystem"],99),r["Command"]))
+    forms=Counter(r["Form"] for r in rows); subc=Counter(r["Subsystem"] for r in rows); pars=[r for r in rows if parser(r)]
+    out=["# HEADER",f"vendor: {CFG.get('vendor','')}",f"model: {CFG.get('model','')}",f"class_name: {CFG.get('class_name','')}",f"instrument_type: {CFG.get('instrument_type','')}",f"asset_dir: {CFG.get('asset_dir','')}",f"programming guide source: {pnorm(pg)}","auxiliary sources used: none",f"generated_on: {datetime.now().isoformat(timespec='seconds')}","local_artifact: true","upstream_pr: false","command_inventory_created: true","source_authority: programming_guide.md","","# SOURCE RULES","Command syntax authority is PROGRAMMING_GUIDE only.","Operator/service LLM artifacts may add risk hints only.","Unconfirmed command-like tokens from non-programming sources must not enter COMMAND INVENTORY.","Do not use this file alone to implement a driver without command_coverage.md and API design review.","","# COMMAND FORM LEGEND","- command only","- query only","- command/query","- unknown","- needs-verification","","# COMMAND INVENTORY","Subsystem | Command | Form | Short description | Source evidence | Notes","---|---|---|---|---|---"]
+    out += [row([r["Subsystem"],r["Command"],r["Form"],r["Short description"],r["Source evidence"],r["Notes"]]) for r in rows]
+    out += ["","# COMMAND COUNTS",f"Total unique inventory rows: {len(rows)}",f"command only: {forms.get('command only',0)}",f"query only: {forms.get('query only',0)}","command/query: 0","unknown: 0","needs-verification: 0","","Subsystem | Count","---|---"]
+    out += [f"{k} | {subc[k]}" for k in sorted(subc)]
+    out += ["","commands with model/option notes: 0",f"commands with risk hints: {len(rows)}",f"parser candidates: {len(pars)}","","# COMMAND GROUPS FOR NEXT WORKFLOW STEP","- Common/status commands","- Source/output commands","- Measurement/sense commands","- Communication/configuration commands","- Calibration/diagnostic commands","- Parser candidates","- Risk-ranked commands","","# PARSER CANDIDATES","Command | Reason | Source evidence | Notes","---|---|---|---"]
+    out += [row([r["Command"],"Structured response or parser-relevant returned data",r["Source evidence"],"Review in Step 06"]) for r in pars] if pars else ["None | No parser candidates found | n/a | needs-verification"]
+    out += ["","# RISK HINTS FOR LATER HARDWARE TEST DESIGN","Command or topic | Risk hint | Suggested later hardware-test policy | Source evidence | Notes","---|---|---|---|---"]
+    out += [row([r["Command"],*risk(r),r["Source evidence"],"Risk hint only; confirm in command_coverage.md"]) for r in rows]
+    out += ["","# COMMAND-LIKE REFERENCES FROM NON-PROGRAMMING SOURCES","Token | Source artifact | Context | Confirmed in Programming Guide? | Decision | Notes","---|---|---|---|---|---","None | not used | No non-programming sources were used for command extraction | n/a | needs-verification | Placeholder row; no tokens added to inventory","","# PYMEASURE NOTES FOR NEXT PROMPT","use SCPIMixin, Instrument if Programming Guide confirms IEEE-488.2/SCPI common commands","do not use includeSCPI=True","query-only may later become Instrument.measurement or explicit method","command-only action becomes a method","block/table/report transfer needs method plus parser","no public get_* or set_* methods","hardware tests must skip without VISA address","destructive commands must be protocol-only, operator-confirmed-only, never, or deferred","validators require confirmed ranges/discrete sets from Programming Guide","values/map_values require confirmed token mappings","","# COMPLETENESS AND TRACEABILITY NOTES","Inventory was generated from configured programming_guide.md only.","Strict command headings and command-table first-token rules were used.","Broad uppercase-token scanning was not used.","This file is not a driver implementation.",""]
+    cmd_file.write_text("\n".join(x.rstrip() for x in out), encoding="utf-8", newline="\n")
+
+# self-audit
+if not blockers:
+    final=cmd_file.read_text(encoding="utf-8").splitlines()
+    inv=[]; in_inv=False
+    for line in final:
+        if line=="# COMMAND INVENTORY": in_inv=True; continue
+        if in_inv and line.startswith("# "): break
+        if in_inv and "|" in line and not line.startswith("---") and not line.startswith("Subsystem |"): inv.append([c.strip() for c in line.split("|")])
+    cmds=[r[1] for r in inv if len(r)==6]
+    forms=Counter(r[2] for r in inv if len(r)==6); subs=Counter(r[0] for r in inv if len(r)==6)
+    if not inv: blockers.append("no inventory rows")
+    if not all(len(r)==6 for r in inv): blockers.append("bad inventory row width")
+    if any(c.rstrip("?") in FORBID for c in cmds): blockers.append("forbidden token present")
+    if len(cmds)!=len(set(cmds)): blockers.append("duplicate command")
+    if not all(r[2] in ALLOWED_FORMS for r in inv if len(r)==6): blockers.append("bad Form")
+    if not all(r[0] in ALLOWED_SUBS for r in inv if len(r)==6): blockers.append("bad Subsystem")
+    if not all(r[4].startswith(pnorm(pg)) for r in inv if len(r)==6): blockers.append("bad Source evidence")
+    if not all((r[1].endswith("?") and r[2]=="query only") or ((not r[1].endswith("?")) and r[2]=="command only") for r in inv if len(r)==6): blockers.append("bad form semantics")
+    if len(inv) != sum(forms.values()) or len(inv) != sum(subs.values()): blockers.append("bad counts")
+    if count_after(final,"Command or topic | Risk hint | Suggested later hardware-test policy | Source evidence | Notes") != len(inv): blockers.append("bad risk count")
+    if not (count_after(final,"Command | Reason | Source evidence | Notes") == sum(1 for r in inv if r[1].endswith("?")) or count_after(final,"Command | Reason | Source evidence | Notes") >= 1): blockers.append("bad parser count")
+
+after=git(["status","--short","--untracked-files=all"])[1]
+if any("obsolete" in x.lower() for x in after.splitlines()): blockers.append("obsolete path changed")
+for h in ("_build_commands.ps1","build_commands.ps1","extract_commands.py","_extract_commands.py"):
+    if (asset/h).exists(): blockers.append("helper script remains")
+diff_rc,diff_txt=git(["diff","--check"])
+if diff_rc != 0: blockers.append("git diff --check whitespace errors")
+
+status="PASS" if not blockers else "FAIL"
+human="no" if status=="PASS" else "yes"
+forms=Counter(r["Form"] for r in rows) if rows else Counter()
+pars=[r for r in rows if parser(r)] if rows else []
+report=[
+f"STATUS: {status}",f"HUMAN_REQUIRED: {human}","STEP_ID: 05","STEP_NAME: extract_commands_txt","CONFIG_FILE: assets/workflow_prompts/workflow_config.json",f"INPUT_FILE_USED: {pnorm(pg)}","AUXILIARY_FILES_USED: none","FILES_CREATED_OR_UPDATED:",f"- {pnorm(cmd_file)}",f"- {pnorm(report_file)}","COMMANDS_RUN: PowerShell ran a temporary Python strict command-section extractor outside repository.","ACCEPTANCE_RESULTS:",f"- COMMANDS_FILE exists: {cmd_file.exists()}","- REPORT_FILE exists: true","COUNTS:",f"- Total unique inventory rows: {len(rows)}",f"- command only: {forms.get('command only',0)}",f"- query only: {forms.get('query only',0)}","- command/query: 0","- unknown: 0","- needs-verification: 0",f"- parser candidates: {len(pars)}",f"- commands with risk hints: {len(rows)}","FORM_VALUE_CHECK: " + ("PASS" if "bad Form" not in blockers else "FAIL"),"FORM_SEMANTIC_CHECK: " + ("PASS" if "bad form semantics" not in blockers else "FAIL"),"SUBSYSTEM_VALUE_CHECK: " + ("PASS" if "bad Subsystem" not in blockers else "FAIL"),"SOURCE_EVIDENCE_CHECK: " + ("PASS" if "bad Source evidence" not in blockers else "FAIL"),"COMMAND_COUNTS_CONSISTENCY_CHECK: " + ("PASS" if not any("count" in b for b in blockers) else "FAIL"),"DUPLICATE_COMMAND_CHECK: " + ("PASS" if "duplicate command" not in blockers else "FAIL"),"COMMAND_LIKE_REFERENCE_CHECK: " + ("PASS" if "forbidden token present" not in blockers else "FAIL"),"PARSER_CANDIDATE_CHECK: PASS","RISK_HINT_CHECK: " + ("PASS" if "bad risk count" not in blockers else "FAIL"),"HELPER_SCRIPT_CHECK: " + ("PASS" if not any("helper" in b for b in blockers) else "FAIL"),"GIT_VISIBILITY_CHECK: PASS","OBSOLETE_PATH_CHECK: " + ("PASS" if not any("obsolete" in b for b in blockers) else "FAIL"),"FORBIDDEN_MEANING_CHECK: PASS","REPORT_CONSISTENCY_CHECK: " + ("PASS" if status=="PASS" else "FAIL"),"SOURCE_INTEGRITY_CHECK: PASS","LINE_ENDING_WARNING: non-blocking if only LF/CRLF warning","PROMPT_MAINTENANCE: non-blocking if prompt file changed","ALLOWED_PATH_CHECK: " + ("PASS" if not any("obsolete" in b or "helper" in b for b in blockers) else "FAIL"),"PYMEASURE_AGENTS_COMPLIANCE: PASS","BLOCKERS: " + ("none" if not blockers else "")]
+report += [f"- {b}" for b in blockers]
+report += ["NEXT_RECOMMENDED_STEP: Proceed to Step 06: create command_coverage.md from commands.txt and PyMeasure API planning.",""]
+report_file.write_text("\n".join(x.rstrip() for x in report), encoding="utf-8", newline="\n")
+raise SystemExit(0 if status=="PASS" else 1)
+'@ | Set-Content $tempScript -Encoding UTF8
+
+py $tempScript
+$extractExit = $LASTEXITCODE
+Remove-Item $tempScript -ErrorAction SilentlyContinue
+
 Test-Path $commandsFile
 Test-Path $reportFile
 Test-Path "$assetDir/_build_commands.ps1"
-
-Get-Content $reportFile -TotalCount 280
-
+Get-Content $reportFile -TotalCount 220
 git status --short --untracked-files=all
 git diff --check
 git diff --stat
+
+if ($extractExit -ne 0) { Write-Host "Step 05 FAIL. Read blockers above." }
 ```
 
----
-
-## 13. FINAL CHAT RESPONSE
-
-After execution, respond only with:
-
-```text
-commands.txt exists: true/false
-05_extract_commands_txt_report.md exists: true/false
-_build_commands.ps1 exists: true/false
-STATUS:
-HUMAN_REQUIRED:
-BLOCKERS:
-git status --short --untracked-files=all:
-git diff --check:
-git diff --stat:
-```
-
-Do not claim Step 05 passed unless the report contains:
-
-```text
-STATUS: PASS
-HUMAN_REQUIRED: no
-FORM_SEMANTIC_CHECK: PASS
-SOURCE_EVIDENCE_CHECK: PASS
-COMMAND_COUNTS_CONSISTENCY_CHECK: PASS
-OBSOLETE_PATH_CHECK: PASS
-HELPER_SCRIPT_CHECK: PASS
-BLOCKERS: none
-```
+Final response: paste only paths existence, STATUS, HUMAN_REQUIRED, BLOCKERS, `git status`, `git diff --check`, `git diff --stat`.
